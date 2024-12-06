@@ -22,9 +22,20 @@ include-before-body:
 
 As of 2023, there are 106 existing national parks in India covering an area of approximately 44,403 km2, which is 1.35% of the geographical area of the country. Many of these national parks, home to the ‘Royal Bengal Tigers’, have become prime tourist attractions of the country. India, with the effort of 50 years of Tiger conservation measures, now harbours almost 75% of the world's wild tiger population. Due to this remarkable increase in tiger sightings resulting from continuous conservation efforts, we have seen a commensurate increase in the higher commercialisation of national parks and tourist footfall. The goal of this study is to assess the implications of rising commercialisation on tiger population and further understand the sustainability of such conservation policies. The anticipated impacts of commercialization included forest cover depletion, a rise in tourism, increased economic activity, and a decline in wildlife populations.
 
+**Data and Methodology**
+For the purpose of our analysis, we make use of the forest cover data to explore the evolution of  forest areas in India over the years. Additionally, we use the Nighttime lights data to understand the economic activity in India over the years. The Forest Cover data and Nightlight data has been sourced from the SHRUG platform developed by Development Data Lab. The granularity of the data goes down till the village or the town level. We use other SHRUG data on location coding and coordinates to assist with plotting. 
+
+The study explores these indicators mainly around two national parks : Jim Corbett National Park and Pench Tiger Reserve. Jim Corbett is located in Ramnagar, Nainital Uttarakhand and harbours maximum tigers in India. It is one of the prime attractions for wildlife tourism and relatively very commercialized to cater to increasing tourist demands. We choose this as one of our study areas because of its bustling development over recent years. Our next choice of study area, Pench Tiger reserve is located in Kurai Village, Seoni-Chhindwara districts of Madhya Pradesh. It is home to just 77 tigers as opposed to 260 tigers in Jim Corbett and is relatively significantly less commercialised. 
+
+To analyse the forest cover and night lights, we essentially look at three years in particular which are 2001, 2010 and 2020. We first analyse the mean vcf (Vegetation Continuous Fields) across India in the three years. For the chosen years between 2000-2011, we use the The Defense Meteorological Program (DMSP) satellite data and for years between 2012-2020, we use the VIIRS nighttime lights data. We also use Tourism Data (both domestic and foreign) from Tourist Statistics Reports published by the Government of Madhya Pradesh and Government of Uttarakhand.
+Essentially we make an exploration of how forest cover and night lights have evolved across the span of our study and draw comparison with tourism movements and wildlife census.
+
+The coding of the project mainly involves three parts: Forest Cover Analysis, Nightlight Analysis, Tourism Footfall Analysis and Shiny Dashboard App. The forest cover and nightlight code involves using static visualisations using libraries like matplotlib, altair and geopandas. The Shiny Dashboard code involves building a multi-page dashboard that shows a dynamic plot of forest cover evolution from 2001-2020. The second page tourism static trend lines in a comparative set up with a toggle and input list options. To further aid our analysis, we have also performed a Natural Language Processing analysis of various news reports on forest cover data collection and methodology. These news articles were web scraped using BeautifulSoup.
+
 **Forest Cover Analysis**
 
 ```{python}
+
 import pandas as pd
 import altair as alt
 import geopandas as gpd
@@ -3047,3 +3058,187 @@ print(f"Percentage change in nightlights from 2012 to 2020 in Kurai, Madhya Prad
 
 As would've been expected, nighttime lights increased over the years. We observed this on an all-India level and also on subsequent levels of the states and districts in which the national parks are situated. Ramnagar experienced a 112.86% increase in nightlights from 2001 to 2010, aligning with peak commercialization around Jim Corbett. In contrast, Kurai, Madhya Pradesh, showed a slower 6.38% rise during the same period, but a dramatic 400.35% increase from 2012 to 2020, reflecting a later commercialization phase. The trend around the areas of Pench was something that stood out for us.
 ![](images/nightlights_pench.png)
+
+**Tourism Analysis**
+
+```{python}
+#| echo: false
+
+#Importing data
+
+tourism_data = pd.read_excel("/Users/nidhi/Desktop/Data and Programming Python 2/Final Project/National Park Visit Data.xlsx")
+tourism_data
+
+```
+
+
+```{python}
+#| echo: false
+#National Park Visit Visualisation of tourism trends over the years
+
+line_chart_1 = alt.Chart(tourism_data).mark_line(point=True).encode(
+    x=alt.X('Year:O', title='Year'),
+    y=alt.Y('Jim Corbett:Q', title='Number of Visitors in Jim Corbett National Park'),
+    tooltip=['Year', 'Jim Corbett'],  # Add tooltip for interactivity
+    color=alt.value('green')  # Set a specific color
+).properties(
+    title='Visitor Trends Over Time',
+    width=600,  # Chart width
+    height=400  # Chart height
+)
+
+#line_chart_1.show()
+
+#We see consistent increase in Jim Corbett total tourism
+
+line_chart_2 = alt.Chart(tourism_data).mark_line(point=True).encode(
+    x=alt.X('Year:O', title='Year'),
+    y=alt.Y('Pench National Park:Q', title='Number of Visitors in Jim Corbett National Park'),
+    tooltip=['Year', 'Pench National Park'],  # Add tooltip for interactivity
+    color=alt.value('orange')  # Set a specific color
+).properties(
+    title='Visitor Trends Over Time (Pench NAational Park)',
+    width=600,  # Chart width
+    height=400  # Chart height
+)
+
+#line_chart_2.show()
+
+#Comparison Chart
+#layered_chart = line_chart_1 + line_chart_2
+#layered_chart.show()
+
+#Basic Comparison plus further exploration:
+#1. Increase in both reeserves
+# 2. Has the increase in Pench been higher than that of Jim Corbett
+# The relative start point of Jim Corbett has been way higher than that of Pench
+
+#Melted data
+visitor_data_long = tourism_data.melt(id_vars="Year", var_name="Park", value_name="Visitors")
+#Combined plot
+line_chart = alt.Chart(visitor_data_long).mark_line(point=True).encode(
+    x=alt.X('Year:O', title='Year'),
+    y=alt.Y('Visitors:Q', title='Number of Visitors'),
+    color=alt.Color(
+        'Park:N',
+        scale=alt.Scale(range=['#006400', '#32CD32', '#FFA500', '#FF8C00']),  # Shades of green and orange
+        legend=alt.Legend(title="Park")
+    ),
+    tooltip=['Year', 'Park', 'Visitors']  # Add tooltips
+).properties(
+    title="Comparative Visitor Trends",
+    width=600,
+    height=400,
+)
+
+line_chart
+            
+```
+
+
+```{python}
+#| echo: false
+
+#Some statistical analysis of tourism numbers 
+
+#Question 1 - How much is start point higher for Jim Corbett than Pench
+jc_start = tourism_data.loc[0, "Jim Corbett"]
+pench_start = tourism_data.loc[0,"Pench National Park"]
+
+diff = ((jc_start - pench_start)/pench_start)*100
+diff = round(diff)
+print(f'The tourism in Jim Corbett starting 2000 was almost {diff}higher than Pench')
+
+#Question 2 - How much has the tourism increased in both national parks over the years through out the study
+jc_end = tourism_data.loc[21,"Jim Corbett"]
+pench_end = tourism_data.loc[21,"Pench National Park"]
+
+roc_jim = ((jc_end - jc_start)/jc_start)*100
+roc_jim = round(roc_jim)
+print(f'The tourism footfall in Jim Corbett increased by {roc_jim}')
+
+roc_pen = ((pench_end - pench_start)/pench_start)*100
+print(f'The tourism footfall increased in Pench by {roc_pen}')
+
+
+#Overall, tourism growth in Pench has been way higher than Jim Corbett despite Jim Corbett harbouring higher number of tigers.
+
+#Question 3 - How much has the the tourism increased in both national parks from 2000-2010
+
+#Part1 - 2000-2010
+jc_2010 = tourism_data.loc[10,"Jim Corbett"]
+pench_2010 = tourism_data.loc[10,"Pench National Park"]
+
+roc_jim_2010 = ((jc_2010 - jc_start)/jc_start)*100
+roc_jim_2010 = round(roc_jim_2010)
+print(f'The tourism footfall from 2000-2010 in Jim Corbett increased by {roc_jim_2010}')
+
+roc_pen_2010 = ((pench_2010 - pench_start)/pench_start)*100
+print(f'The tourism footfall from 2000-2010 increased in Pench by {roc_pen_2010}')
+
+#part2 - 2010-End
+roc_jim_end = ((jc_end - jc_2010)/jc_2010)*100
+roc_jim_end = round(roc_jim)
+print(f'The tourism footfall in Jim Corbett 2010-2021 increased by {roc_jim_end}')
+
+roc_pen_end = ((pench_end - pench_2010)/pench_2010)*100
+roc_pen_end= round(roc_pen_end)
+print(f'The tourism footfall from 2010-2021 increased in Pench by {roc_pen_end}')
+
+
+```
+
+```{python}
+#| echo: false
+#Tourism Increase in jim Corbett  from 2001-2010 & 2012-2020
+jc_2001 = tourism_data.loc[1, "Jim Corbett"]
+jc_2010 = tourism_data.loc[10, "Jim Corbett"]
+jc_2012 = tourism_data.loc[12, "Jim Corbett"]
+jc_2020 = tourism_data.loc[20, "Jim Corbett"]
+
+diff_2010 = ((jc_2010 - jc_2001)/jc_2001)*100
+diff_2020 = ((jc_2020 - jc_2012)/jc_2012)*100
+
+print(f'The increase in Jim Corbett tourism from 2001 to 2010 is {diff_2010}')
+print(f'The increase in Jim Corbett tourism from 2012 to 2020 is {diff_2020}')
+
+```
+
+```{python}
+#| echo: false
+#Tourism Increase in Pench  from 2001-2010 & 2012-2020
+pench_2001 = tourism_data.loc[1, "Pench National Park"]
+pench_2010 = tourism_data.loc[10, "Pench National Park"]
+pench_2012 = tourism_data.loc[12, "Pench National Park"]
+pench_2020 = tourism_data.loc[20, "Pench National Park"]
+
+diff_2010 = (pench_2010 - pench_2001)/(pench_2001)*100
+diff_2020 = (pench_2020 - pench_2012)/(pench_2012)*100
+
+print(f'The increase in Pench tourism from 2001 to 2010 is {diff_2010}')
+print(f'The increase in Pench tourism from 2012 to 2020 is {diff_2020}')
+
+
+```
+
+
+```{python}
+#| echo: false
+jc_2021 = tourism_data.loc[21, "Jim Corbett"]
+jc_2023  = tourism_data.loc[23, "Jim Corbett"]
+change = ((jc_2023 - jc_2021)/jc_2021)*100
+
+print(f'The increase in JC from 2021 to 2023 is {change}')
+```
+
+```{python}
+#| echo: false
+pench_2021 = tourism_data.loc[21,"Pench National Park"]
+
+change_pench = ((pench_end - pench_2021)/pench_2021)*100
+
+print(f'The increase in Pench from 2021 to 2023 is {change_pench}')
+```
+
+
+Tourism trends revealed significant growth, particularly in Pench National Park, which saw a remarkable 1417% increase in footfalls compared to 480% in Jim Corbett between 2000 and 2021. While Jim Corbett historically attracted more tourists, Pench has become a popular destination, especially for tiger sightings. During 2000-2010, Pench experienced a 524% rise in tourism compared to Jim Corbett’s 212%, but the growth reversed in 2010-2021, with Jim Corbett seeing a 447% increase compared to Pench’s 143%.
