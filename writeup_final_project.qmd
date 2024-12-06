@@ -945,10 +945,6 @@ plt.tight_layout()
 plt.show()
 ```
 
-Hence, it is fair to assume that forest cover depletion is not the best metric to understand the impacts of commercialisation of National Parks in India.
-
-To confirm this hypothesis, we can look at the percentage increase in forest cover in the particular subdistricts of each of our national parks.
-
 **Looking at Percentage Increases**
 
 ```{python}
@@ -1027,21 +1023,15 @@ forest_cover_mp_seoni_chhindwara_kurai = vcf_india[
     (vcf_india["shrid2"].str.startswith("11-23-456-03666-497170"))]
 ```
 
-We can add the location in each row from the shrid id.
-
 ```{python}
 # Merging on the basis of the shrid2 id
 forest_cover_mp_seoni_chhindwara_kurai = pd.merge(forest_cover_mp_seoni_chhindwara_kurai, kurai_id, on = "shrid2")
 ```
 
-Now we can add the spatial characteristics of each entry
-
 ```{python}
 # Merging on the basis of shrid2 id again
 vcf_mp_seoni_chhindwara_kurai = pd.merge(forest_cover_mp_seoni_chhindwara_kurai, coordinates_shrid, on = "shrid2")
 ```
-
-Converting this into a spatial object
 
 ```{python}
 from shapely.geometry import Point
