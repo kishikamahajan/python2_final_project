@@ -31,3 +31,1518 @@ To analyse the forest cover and night lights, we essentially look at three years
 Essentially we make an exploration of how forest cover and night lights have evolved across the span of our study and draw comparison with tourism movements and wildlife census.
 
 The coding of the project mainly involves three parts: Forest Cover Analysis, Nightlight Analysis, Tourism Footfall Analysis and Shiny Dashboard App. The forest cover and nightlight code involves using static visualisations using libraries like matplotlib, altair and geopandas. The Shiny Dashboard code involves building a multi-page dashboard that shows a dynamic plot of forest cover evolution from 2001-2020. The second page tourism static trend lines in a comparative set up with a toggle and input list options. To further aid our analysis, we have also performed a Natural Language Processing analysis of various news reports on forest cover data collection and methodology. These news articles were web scraped using BeautifulSoup.
+
+**Forest Cover Analysis**
+
+```{python}
+import pandas as pd
+import altair as alt
+import geopandas as gpd
+```
+
+```{python}
+# reading the forest cover data for india
+vcf_india = pd.read_csv("/Users/kishikamahajan/Desktop/python2_final_project/shrug-vcf-csv/vcf_shrid.csv")
+vcf_india.head()
+```
+
+```{python}
+# Loading the shrid location dictionary
+location_shrid = pd.read_csv("/Users/kishikamahajan/Desktop/python2_final_project/shrug-shrid-keys-csv/shrid_loc_names.csv")
+location_shrid.head()
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+vcf_india_master = pd.merge(vcf_india, location_shrid, on = "shrid2")
+```
+
+```{python}
+# Loading the coordinates' file to add spatial characteristics
+coordinates_shrid = pd.read_csv("/Users/kishikamahajan/Desktop/python2_final_project/shrug-shrid-keys-csv/shrid2_spatial_stats.csv")
+coordinates_shrid.head()
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+vcf_india_master = pd.merge(vcf_india_master, coordinates_shrid, on = "shrid2")
+vcf_india_master.head()
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+vcf_india_master["geometry"] = vcf_india_master.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_vcf_india_master = gpd.GeoDataFrame(vcf_india_master, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# subsetting 2001 only
+gdf_vcf_india_master_2001 = gdf_vcf_india_master[gdf_vcf_india_master["year"] == 2001]
+```
+
+```{python}
+# plotting 2001 only
+plot_2001 = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_vcf_india_master_2001.plot(
+    column = "vcf_mean",  
+    cmap = "Greens",     
+    legend = True,        
+    ax = ax
+)
+
+# Add a title and remove axes 
+ax.set_title("Forest Cover (vcf_mean) by Region", fontsize = 16)
+ax.axis("off")  
+plot_2001
+```
+
+```{python}
+#2010 only
+gdf_vcf_india_master_2010 = gdf_vcf_india_master[gdf_vcf_india_master["year"] == 2010]
+```
+
+```{python}
+# plotting 2010 only
+plot_2010 = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_vcf_india_master_2010.plot(
+    column = "vcf_mean", 
+    cmap = "Greens",     
+    legend = True,        
+    ax = ax
+)
+
+# Add a title and remove axes 
+ax.set_title("Forest Cover (vcf_mean) by Region", fontsize = 16)
+ax.axis("off")  
+plot_2010
+```
+
+```{python}
+# 2020 only
+gdf_vcf_india_master_2020 = gdf_vcf_india_master[gdf_vcf_india_master["year"] == 2020]
+```
+
+```{python}
+# plotting 2020 only
+plot_2020 = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_vcf_india_master_2020.plot(
+    column = "vcf_mean",  
+    cmap = "Greens",    
+    legend = True,       
+    ax = ax
+)
+
+# Add a title and remove axes 
+ax.set_title("Forest Cover (vcf_mean) by Region", fontsize = 16)
+ax.axis("off")  
+plot_2020
+```
+
+```{python}
+# For subplots
+fig, axes = plt.subplots(1, 3, figsize=(18, 6))  
+
+# Plot each year on a different subplot
+gdf_vcf_india_master_2001.plot(
+    column='vcf_mean', cmap='Greens', legend=True, ax=axes[0]
+)
+axes[0].set_title("2001")
+
+gdf_vcf_india_master_2010.plot(
+    column='vcf_mean', cmap='Greens', legend=True, ax=axes[1]
+)
+axes[1].set_title("2010")
+
+gdf_vcf_india_master_2020.plot(
+    column='vcf_mean', cmap='Greens', legend=True, ax=axes[2]
+)
+axes[2].set_title("2020")
+
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+# National parks' analysis 
+# For Jim Corbett only
+# Subsetting only Uttarakhand for the purposes of the Jim Corbett National Park
+
+uttarakhand_id = location_shrid[location_shrid["state_name"] == "uttarakhand"]
+print(uttarakhand_id)
+```
+
+```{python}
+# As we can see that Uttarakhan starts with 11-05.
+# So, we can substitute this from the forest cover data as well. 
+forest_cover_uttarakhand = vcf_india[vcf_india["shrid2"].str.startswith("11-05")]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+vcf_uttarakhand = pd.merge(forest_cover_uttarakhand, uttarakhand_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+vcf_uttarakhand = pd.merge(vcf_uttarakhand, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+vcf_uttarakhand["geometry"] = vcf_uttarakhand.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_vcf_uttarakhand = gpd.GeoDataFrame(vcf_uttarakhand, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+india_state_shapefile = gpd.read_file("/Users/kishikamahajan/Desktop/python2_final_project/india_shapefiles/India_State_Boundary.shp")
+
+# getting only Uttarakhand
+uttarakhand_boundary = india_state_shapefile[india_state_shapefile["State_Name"] == "Uttarakhand"]
+
+uttarakhand_boundary = gpd.GeoDataFrame(uttarakhand_boundary, geometry='geometry')
+
+uttarakhand_boundary = uttarakhand_boundary.to_crs(gdf_vcf_uttarakhand.crs)
+```
+
+```{python}
+import matplotlib.pyplot as plt
+
+# 2001 only
+gdf_vcf_uttarakhand_2001 = gdf_vcf_uttarakhand[gdf_vcf_uttarakhand["year"] == 2001]
+```
+
+```{python}
+# plotting 2001 only
+plot_2001_uttarakhand = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_vcf_uttarakhand_2001.plot(
+    column = "vcf_mean",  
+    cmap = "Greens",     
+    legend = True,        
+    ax = ax
+)
+
+# Overlay Uttarakhand boundary
+uttarakhand_boundary.boundary.plot(
+    ax=ax,              # Plot on the same axes
+    color="black",        # Boundary line color
+    linewidth=2         # Line thickness
+)
+
+# Coordinates of the point
+latitude = 29.548599
+longitude = 78.935303
+
+# Add the point to the map
+ax.scatter(
+    longitude, latitude,  
+    color="red",   
+    marker="o",   
+    s=50,    
+    label="Point of Interest" 
+)
+
+# Add a title and remove axes 
+ax.set_title("Forest Cover (vcf_mean) in Uttarakhand", fontsize = 16)
+ax.axis("off")  
+plot_2001_uttarakhand
+```
+
+```{python}
+#2010 only
+gdf_vcf_uttarakhand_2010 = gdf_vcf_uttarakhand[gdf_vcf_uttarakhand["year"] == 2010]
+```
+
+```{python}
+# plotting 2010 only
+plot_2010_uttarakhand = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_vcf_uttarakhand_2010.plot(
+    column = "vcf_mean", 
+    cmap = "Greens", 
+    legend = True,       
+    ax = ax
+)
+
+# Overlay Uttarakhand boundary
+uttarakhand_boundary.boundary.plot(
+    ax=ax,        
+    color="black",  
+    linewidth=2        
+)
+
+# Coordinates of the point
+latitude = 29.548599
+longitude = 78.935303
+
+# Add the point to the map
+ax.scatter(
+    longitude, latitude,  
+    color="red",         
+    marker="o",          
+    s=50,                
+    label="Point of Interest" 
+)
+
+# Add a title and remove axes for clarity
+ax.set_title("Forest Cover (vcf_mean) in Uttarakhand", fontsize = 16)
+ax.axis("off")  # Hide axis for a clean look
+plot_2010_uttarakhand
+```
+
+```{python}
+# 2020 only
+gdf_vcf_uttarakhand_2020 = gdf_vcf_uttarakhand[gdf_vcf_uttarakhand["year"] == 2020]
+```
+
+```{python}
+# plotting 2020 only
+plot_2020_uttarakhand = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_vcf_uttarakhand_2020.plot(
+    column = "vcf_mean", 
+    cmap = "Greens",   
+    legend = True,     
+    ax = ax
+)
+
+# Overlay Uttarakhand boundary
+uttarakhand_boundary.boundary.plot(
+    ax=ax,      
+    color="black",     
+    linewidth=2  
+)
+
+# Coordinates of the point
+latitude = 29.548599
+longitude = 78.935303
+
+# Add the point to the map
+ax.scatter(
+    longitude, latitude, 
+    color="red",   
+    marker="o",      
+    s=50,      
+    label="Point of Interest"  
+)
+
+# Add a title and remove axes for clarity
+ax.set_title("Forest Cover (vcf_mean) in Uttarakhand", fontsize = 16)
+ax.axis("off")  
+plot_2020_uttarakhand
+```
+
+```{python}
+# For subplots
+fig, axes = plt.subplots(1, 3, figsize=(18, 6)) 
+
+# 2001 plot
+gdf_vcf_uttarakhand_2001.plot(
+    column='vcf_mean', cmap='Greens', legend=True, ax=axes[0]
+)
+axes[0].set_title("2001")
+
+# Overlay Uttarakhand boundary and the point for 2001
+uttarakhand_boundary.boundary.plot(ax=axes[0], color="black", linewidth=2)
+axes[0].scatter(longitude, latitude, color="red", marker="o", s=50, label="Jim Corbett National Park")
+axes[0].legend()  
+
+# 2010 plot
+gdf_vcf_uttarakhand_2010.plot(
+    column='vcf_mean', cmap='Greens', legend=True, ax=axes[1]
+)
+axes[1].set_title("2010")
+
+# Overlay Uttarakhand boundary and the point for 2010
+uttarakhand_boundary.boundary.plot(ax=axes[1], color="black", linewidth=2)
+axes[1].scatter(longitude, latitude, color="red", marker="o", s=50, label="Jim Corbett National Park")
+axes[1].legend()  
+
+# 2020 plot
+gdf_vcf_uttarakhand_2020.plot(
+    column='vcf_mean', cmap='Greens', legend=True, ax=axes[2]
+)
+axes[2].set_title("2020")
+
+# Overlay Uttarakhand boundary and the point for 2020
+uttarakhand_boundary.boundary.plot(ax=axes[2], color="black", linewidth=2)
+axes[2].scatter(longitude, latitude, color="red", marker="o", s=50, label="Jim Corbett National Park")
+axes[2].legend()  
+
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+# Looking at just Nainital which is the district of Jim Corbett
+value_to_check = 'nainital'
+
+# Using `in` operator
+if value_to_check in uttarakhand_id['district_name'].values:
+    print(f"{value_to_check} is present in the 'disrict_name' column.")
+```
+
+```{python}
+nainital_id = uttarakhand_id[uttarakhand_id["district_name"] == "nainital"]
+```
+
+```{python}
+# As we can see that Nainital starts with 11-05-066.
+# So, we can substitute this from the forest cover data as well. 
+forest_cover_uttarakhand_nainital = vcf_india[vcf_india["shrid2"].str.startswith("11-05-066")]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+vcf_uttarakhand_nainital = pd.merge(forest_cover_uttarakhand_nainital, nainital_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+vcf_uttarakhand_nainital = pd.merge(vcf_uttarakhand_nainital, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+vcf_uttarakhand_nainital["geometry"] = vcf_uttarakhand_nainital.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_vcf_uttarakhand_nainital = gpd.GeoDataFrame(vcf_uttarakhand_nainital, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+district_boundaries = gpd.read_file("/Users/kishikamahajan/Desktop/python2_final_project/india_shapefiles/shrug-pc11dist-poly-shp/district.shp")
+
+# getting only nainital district
+nainital_boundaries = district_boundaries[district_boundaries["pc11_d_id"] == "066"]
+nainital_boundaries = gpd.GeoDataFrame(nainital_boundaries, geometry='geometry')
+nainital_boundaries = nainital_boundaries.to_crs(gdf_vcf_uttarakhand.crs)
+```
+
+```{python}
+import matplotlib.pyplot as plt
+
+# 2001 only
+gdf_vcf_uttarakhand_nainital_2001 = gdf_vcf_uttarakhand_nainital[gdf_vcf_uttarakhand_nainital["year"] == 2001]
+```
+
+```{python}
+# plotting 2001 only
+plot_2001_uttarakhand_nainital = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_vcf_uttarakhand_nainital_2001.plot(
+    column = "vcf_mean", 
+    cmap = "Greens",  
+    legend = True,      
+    ax = ax
+)
+
+# Overlay Uttarakhand boundary
+nainital_boundaries.boundary.plot(
+    ax=ax,   
+    color="black",       
+    linewidth=2   
+)
+
+# Add a title and remove axes for clarity
+ax.set_title("Forest Cover (vcf_mean) in Nainital, Uttarakhand", fontsize = 16)
+ax.axis("off")  
+plot_2001_uttarakhand_nainital
+```
+
+```{python}
+#2010 only
+gdf_vcf_uttarakhand_nainital_2010 = gdf_vcf_uttarakhand_nainital[gdf_vcf_uttarakhand_nainital["year"] == 2010]
+```
+
+```{python}
+# plotting 2010 only
+plot_2010_uttarakhand_nainital = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_vcf_uttarakhand_nainital_2010.plot(
+    column = "vcf_mean",  
+    cmap = "Greens",     
+    legend = True,        
+    ax = ax
+)
+
+# Overlay Uttarakhand boundary
+nainital_boundaries.boundary.plot(
+    ax=ax,            
+    color="black",       
+    linewidth=2       
+)
+
+# Add a title and remove axes for clarity
+ax.set_title("Forest Cover (vcf_mean) in Nainital, Uttarakhand", fontsize = 16)
+ax.axis("off")  
+plot_2010_uttarakhand_nainital
+```
+
+```{python}
+# 2020 only
+gdf_vcf_uttarakhand_nainital_2020 = gdf_vcf_uttarakhand_nainital[gdf_vcf_uttarakhand_nainital["year"] == 2020]
+```
+
+```{python}
+# plotting 2020 only
+plot_2020_uttarakhand_nainital = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_vcf_uttarakhand_nainital_2020.plot(
+    column = "vcf_mean", 
+    cmap = "Greens",    
+    legend = True,  
+    ax = ax
+)
+
+# Overlay Nainital boundary
+nainital_boundaries.boundary.plot(
+    ax=ax,          
+    color="black",      
+    linewidth=2        
+)
+
+# Add a title and remove axes 
+ax.set_title("Forest Cover (vcf_mean) in Nainital, Uttarakhand", fontsize = 16)
+ax.axis("off")
+plot_2020_uttarakhand_nainital
+```
+
+```{python}
+# Set up a figure with subplots (1 row, 3 columns)
+fig, axes = plt.subplots(1, 3, figsize=(18, 6))  # 1 row, 3 columns
+
+# Plot each year on a different subplot and add the boundary and point to each
+
+# 2001 plot
+gdf_vcf_uttarakhand_nainital_2001.plot(
+    column='vcf_mean', cmap='Greens', legend=True, ax=axes[0]
+)
+axes[0].set_title("2001")
+
+# Overlay Uttarakhand boundary and the point for 2001
+nainital_boundaries.boundary.plot(ax=axes[0], color="black", linewidth=2)
+
+# 2010 plot
+gdf_vcf_uttarakhand_nainital_2010.plot(
+    column='vcf_mean', cmap='Greens', legend=True, ax=axes[1]
+)
+axes[1].set_title("2010")
+
+# Overlay Uttarakhand boundary and the point for 2010
+nainital_boundaries.boundary.plot(ax=axes[1], color="black", linewidth=2)
+
+# 2020 plot
+gdf_vcf_uttarakhand_nainital_2020.plot(
+    column='vcf_mean', cmap='Greens', legend=True, ax=axes[2]
+)
+axes[2].set_title("2020")
+
+# Overlay Uttarakhand boundary and the point for 2020
+nainital_boundaries.boundary.plot(ax=axes[2], color="black", linewidth=2)
+
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+# For the purposes of Pench National Park
+# Subsetting only Madhya Pradesh for the purposes of the Pench National Park
+
+mp_id = location_shrid[location_shrid["state_name"] == "madhya pradesh"]
+```
+
+```{python}
+# As we can see that Pench starts with 11-23.
+# So, we can substitute this from the forest cover data as well. 
+forest_cover_mp = vcf_india[vcf_india["shrid2"].str.startswith("11-23")]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+vcf_mp = pd.merge(forest_cover_mp, mp_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+vcf_mp = pd.merge(vcf_mp, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+vcf_mp["geometry"] = vcf_mp.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_vcf_mp = gpd.GeoDataFrame(vcf_mp, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+india_state_shapefile = gpd.read_file("/Users/kishikamahajan/Desktop/python2_final_project/india_shapefiles/India_State_Boundary.shp")
+
+# getting only Uttarakhand
+mp_boundary = india_state_shapefile[india_state_shapefile["State_Name"] == "Madhya Pradesh"]
+
+mp_boundary = gpd.GeoDataFrame(mp_boundary, geometry='geometry')
+
+mp_boundary = mp_boundary.to_crs(gdf_vcf_mp.crs)
+```
+
+```{python}
+import matplotlib.pyplot as plt
+
+# 2001 only
+gdf_vcf_mp_2001 = gdf_vcf_mp[gdf_vcf_mp["year"] == 2001]
+```
+
+```{python}
+# plotting 2001 only
+plot_2001_mp = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_vcf_mp_2001.plot(
+    column = "vcf_mean",  
+    cmap = "Greens",  
+    legend = True,       
+    ax = ax
+)
+
+# Overlay Madhya Pradesh boundary
+mp_boundary.boundary.plot(
+    ax=ax,          
+    color="black",       
+    linewidth=2        
+)
+
+# Coordinates of the point
+latitude = 22.016617
+longitude = 79.829674
+
+# Add the point to the map
+ax.scatter(
+    longitude, latitude,  
+    color="red",       
+    marker="o",  
+    s=50,            
+    label="Point of Interest"  
+)
+
+# Add a title and remove axes 
+ax.set_title("Forest Cover (vcf_mean) in Madhya Pradesh", fontsize = 16)
+ax.axis("off")  
+plot_2001_mp
+```
+
+```{python}
+#2010 only
+gdf_vcf_mp_2010 = gdf_vcf_mp[gdf_vcf_mp["year"] == 2010]
+```
+
+```{python}
+# plotting 2010 only
+plot_2010_mp = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_vcf_mp_2010.plot(
+    column = "vcf_mean",  
+    cmap = "Greens",    
+    legend = True,     
+    ax = ax
+)
+
+# Overlay Uttarakhand boundary
+mp_boundary.boundary.plot(
+    ax=ax,  
+    color="black",    
+    linewidth=2       
+)
+
+# Coordinates of the point
+latitude = 22.016617
+longitude = 79.829674
+
+# Add the point to the map
+ax.scatter(
+    longitude, latitude, 
+    color="red",       
+    marker="o",    
+    s=50,              
+    label="Point of Interest"  
+)
+
+# Add a title and remove axes 
+ax.set_title("Forest Cover (vcf_mean) in Madhya Pradesh", fontsize = 16)
+ax.axis("off")
+plot_2010_mp
+```
+
+```{python}
+# 2020 only
+gdf_vcf_mp_2020 = gdf_vcf_mp[gdf_vcf_mp["year"] == 2020]
+```
+
+```{python}
+# plotting 2020 only
+plot_2020_mp = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_vcf_mp_2020.plot(
+    column = "vcf_mean", 
+    cmap = "Greens",    
+    legend = True, 
+    ax = ax
+)
+
+# Overlay Uttarakhand boundary
+mp_boundary.boundary.plot(
+    ax=ax,            
+    color="black",     
+    linewidth=2       
+)
+
+# Coordinates of the point
+latitude = 22.016617
+longitude = 79.829674
+
+# Add the point to the map
+ax.scatter(
+    longitude, latitude, 
+    color="red",       
+    marker="o",      
+    s=50,            
+    label="Point of Interest"  
+)
+
+# Add a title and remove axes 
+ax.set_title("Forest Cover (vcf_mean) in Madhya Pradesh", fontsize = 16)
+ax.axis("off")  
+plot_2020_mp
+```
+
+```{python}
+# For subplots
+fig, axes = plt.subplots(1, 3, figsize=(18, 6))  
+
+# 2001 plot
+gdf_vcf_mp_2001.plot(
+    column='vcf_mean', cmap='Greens', legend=True, ax=axes[0]
+)
+axes[0].set_title("2001")
+
+# Overlay MP boundary and the point for 2001
+mp_boundary.boundary.plot(ax=axes[0], color="black", linewidth=2)
+axes[0].scatter(longitude, latitude, color="red", marker="o", s=50, label="Pench National Park")
+axes[0].legend()  
+
+# 2010 plot
+gdf_vcf_mp_2010.plot(
+    column='vcf_mean', cmap='Greens', legend=True, ax=axes[1]
+)
+axes[1].set_title("2010")
+
+# Overlay MP boundary and the point for 2010
+mp_boundary.boundary.plot(ax=axes[1], color="black", linewidth=2)
+axes[1].scatter(longitude, latitude, color="red", marker="o", s=50, label="Pench National Park")
+axes[1].legend()  # Add a legend
+
+# 2020 plot
+gdf_vcf_mp_2020.plot(
+    column='vcf_mean', cmap='Greens', legend=True, ax=axes[2]
+)
+axes[2].set_title("2020")
+
+# Overlay MP boundary and the point for 2020
+mp_boundary.boundary.plot(ax=axes[2], color="black", linewidth=2)
+axes[2].scatter(longitude, latitude, color="red", marker="o", s=50, label="Pench National Park")
+axes[2].legend()  # Add a legend
+
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+# districts of pench
+value_to_check = 'seoni'
+
+# Using `in` operator
+if value_to_check in mp_id['district_name'].values:
+    print(f"{value_to_check} is present in the 'disrict_name' column.")
+```
+
+```{python}
+# districts of pench
+value_to_check = 'chhindwara'
+
+# Using `in` operator
+if value_to_check in mp_id['district_name'].values:
+    print(f"{value_to_check} is present in the 'disrict_name' column.")
+```
+
+```{python}
+seoni_chhindwara_id = mp_id[(mp_id["district_name"] == "seoni") | (mp_id["district_name"] == "chhindwara")]
+```
+
+```{python}
+# As we can see that these districts start with 11-23-455 and 11-23-456.
+# So, we can substitute this from the forest cover data as well. 
+forest_cover_mp_seoni_chhindwara = vcf_india[
+    (vcf_india["shrid2"].str.startswith("11-23-455")) | 
+    (vcf_india["shrid2"].str.startswith("11-23-456"))
+]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+vcf_mp_seoni_chhindwara = pd.merge(forest_cover_mp_seoni_chhindwara, seoni_chhindwara_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+vcf_mp_seoni_chhindwara = pd.merge(vcf_mp_seoni_chhindwara, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+vcf_mp_seoni_chhindwara["geometry"] = vcf_mp_seoni_chhindwara.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_vcf_mp_seoni_chhindwara = gpd.GeoDataFrame(vcf_mp_seoni_chhindwara, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+district_boundaries = gpd.read_file("/Users/kishikamahajan/Desktop/python2_final_project/india_shapefiles/shrug-pc11dist-poly-shp/district.shp")
+
+# getting only sc districts
+seoni_chhindwara_boundaries = district_boundaries[
+    (district_boundaries["pc11_d_id"] == "455") | 
+    (district_boundaries["pc11_d_id"] == "456")]
+seoni_chhindwara_boundaries = gpd.GeoDataFrame(seoni_chhindwara_boundaries, geometry='geometry')
+seoni_chhindwara_boundaries = seoni_chhindwara_boundaries.to_crs(gdf_vcf_mp.crs)
+```
+
+```{python}
+import matplotlib.pyplot as plt
+
+# 2001 only
+gdf_vcf_mp_seoni_chhindwara_2001 = gdf_vcf_mp_seoni_chhindwara[gdf_vcf_mp_seoni_chhindwara["year"] == 2001]
+```
+
+```{python}
+# plotting 2001 only
+plot_2001_mp_seoni_chhindwara = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_vcf_mp_seoni_chhindwara_2001.plot(
+    column = "vcf_mean",  
+    cmap = "Greens",  
+    legend = True,        
+    ax = ax
+)
+
+# Overlay SC boundary
+seoni_chhindwara_boundaries.boundary.plot(
+    ax=ax,        
+    color="black",    
+    linewidth=2     
+)
+
+# Add a title and remove axes 
+ax.set_title("Forest Cover (vcf_mean) in Seoni and Chhindwara, Madhya Pradesh", fontsize = 16)
+ax.axis("off")  
+plot_2001_mp_seoni_chhindwara
+```
+
+```{python}
+#2010 only
+gdf_vcf_mp_seoni_chhindwara_2010 = gdf_vcf_mp_seoni_chhindwara[gdf_vcf_mp_seoni_chhindwara["year"] == 2010]
+```
+
+```{python}
+# plotting 2010 only
+plot_2010_seoni_chhindwara_mp = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_vcf_mp_seoni_chhindwara_2010.plot(
+    column = "vcf_mean",  
+    cmap = "Greens",
+    legend = True,     
+    ax = ax
+)
+
+# Overlay SC boundary
+seoni_chhindwara_boundaries.boundary.plot(
+    ax=ax,        
+    color="black",      
+    linewidth=2      
+)
+
+# Add a title and remove axes 
+ax.set_title("Forest Cover (vcf_mean) in Seoni and Chhindwara, Madhya Pradesh", fontsize = 16)
+ax.axis("off")  
+plot_2010_seoni_chhindwara_mp
+```
+
+```{python}
+# 2020 only
+gdf_vcf_mp_seoni_chhindwara_2020 = gdf_vcf_mp_seoni_chhindwara[gdf_vcf_mp_seoni_chhindwara["year"] == 2020]
+```
+
+```{python}
+# plotting 2020 only
+plot_2020_mp_seoni_chhindwara = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_vcf_mp_seoni_chhindwara_2020.plot(
+    column = "vcf_mean", 
+    cmap = "Greens",   
+    legend = True,       
+    ax = ax
+)
+
+# Overlay SC boundary
+seoni_chhindwara_boundaries.boundary.plot(
+    ax=ax,       
+    color="black",       
+    linewidth=2         
+)
+
+# Add a title and remove axes
+ax.set_title("Forest Cover (vcf_mean) in Seoni and Chhindwara, Madhya Pradesh", fontsize = 16)
+ax.axis("off")  
+plot_2020_mp_seoni_chhindwara
+```
+
+```{python}
+# For subplots
+fig, axes = plt.subplots(1, 3, figsize=(18, 6))  # 1 row, 3 columns
+
+# 2001 plot
+gdf_vcf_mp_seoni_chhindwara_2001.plot(
+    column='vcf_mean', cmap='Greens', legend=True, ax=axes[0]
+)
+axes[0].set_title("2001")
+
+# Overlay SC boundary and the point for 2001
+seoni_chhindwara_boundaries.boundary.plot(ax=axes[0], color="black", linewidth=2)
+
+# 2010 plot
+gdf_vcf_mp_seoni_chhindwara_2010.plot(
+    column='vcf_mean', cmap='Greens', legend=True, ax=axes[1]
+)
+axes[1].set_title("2010")
+
+# Overlay SC boundary and the point for 2010
+seoni_chhindwara_boundaries.boundary.plot(ax=axes[1], color="black", linewidth=2)
+
+# 2020 plot
+gdf_vcf_mp_seoni_chhindwara_2020.plot(
+    column='vcf_mean', cmap='Greens', legend=True, ax=axes[2]
+)
+axes[2].set_title("2020")
+
+# Overlay SC boundary and the point for 2020
+seoni_chhindwara_boundaries.boundary.plot(ax=axes[2], color="black", linewidth=2)
+
+# Adjust layout for better spacing
+plt.tight_layout()
+
+# Show the combined plot
+plt.show()
+```
+
+**Looking at Percentage Increases**
+
+```{python}
+# The Jim Corbett National Park is in the Ramnagar subdistrict of Nainital district in Uttarakhand. 
+value_to_check = 'ramnagar'
+
+# Using `in` operator
+if value_to_check in nainital_id['subdistrict_name'].values:
+    print(f"{value_to_check} is present in the 'subdistrict_name' column.")
+```
+
+```{python}
+# getting only ramnagar
+ramnagar_id = nainital_id[nainital_id["subdistrict_name"] == "ramnagar"]
+```
+
+```{python}
+forest_cover_uttarakhand_nainital_ramnagar = vcf_india[vcf_india["shrid2"].str.startswith("11-05-066-00343")]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+vcf_uttarakhand_nainital_ramnagar = pd.merge(forest_cover_uttarakhand_nainital_ramnagar, ramnagar_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+vcf_uttarakhand_nainital_ramnagar = pd.merge(vcf_uttarakhand_nainital_ramnagar, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+vcf_uttarakhand_nainital_ramnagar["geometry"] = vcf_uttarakhand_nainital_ramnagar.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_vcf_uttarakhand_nainital_ramnagar = gpd.GeoDataFrame(vcf_uttarakhand_nainital_ramnagar, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# Filter for the years 2001 and 2020
+gdf_vcf_uttarakhand_nainital_ramnagar_2001 = gdf_vcf_uttarakhand_nainital_ramnagar[gdf_vcf_uttarakhand_nainital_ramnagar['year'] == 2001]["vcf_mean"].values
+gdf_vcf_uttarakhand_nainital_ramnagar_2020 = gdf_vcf_uttarakhand_nainital_ramnagar[gdf_vcf_uttarakhand_nainital_ramnagar['year'] == 2020]["vcf_mean"].values
+```
+
+```{python}
+# Calculate the mean for 2001 and 2020
+vcf_2001_uttarakhand_nainital_ramnagar = gdf_vcf_uttarakhand_nainital_ramnagar_2001.mean()
+vcf_2020_uttarakhand_nainital_ramnagar = gdf_vcf_uttarakhand_nainital_ramnagar_2020.mean()
+
+# Calculate percentage change
+percentage_change_fc_uttarakhand_nainital_ramnagar = ((vcf_2020_uttarakhand_nainital_ramnagar - vcf_2001_uttarakhand_nainital_ramnagar) / vcf_2001_uttarakhand_nainital_ramnagar) * 100
+print(f"Percentage change in VCF Mean from 2001 to 2020 in Ramnagar, Nainital, Uttarakhand: {percentage_change_fc_uttarakhand_nainital_ramnagar:.2f}%")
+```
+
+```{python}
+# Pench National Park is located in the Kurai village of Madhya Pradesh district. 
+# Looking at just Kurai village. 
+value_to_check = 'kurai'
+
+# Using `in` operator
+if value_to_check in seoni_chhindwara_id['village_name'].values:
+    print(f"{value_to_check} is present in the 'village_name' column.")
+```
+
+```{python}
+kurai_id = seoni_chhindwara_id[seoni_chhindwara_id["village_name"] == "kurai"]
+```
+
+```{python}
+forest_cover_mp_seoni_chhindwara_kurai = vcf_india[
+    (vcf_india["shrid2"].str.startswith("11-23-455-03657-495377")) |
+    (vcf_india["shrid2"].str.startswith("11-23-456-03666-497170"))]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+forest_cover_mp_seoni_chhindwara_kurai = pd.merge(forest_cover_mp_seoni_chhindwara_kurai, kurai_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+vcf_mp_seoni_chhindwara_kurai = pd.merge(forest_cover_mp_seoni_chhindwara_kurai, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+vcf_mp_seoni_chhindwara_kurai["geometry"] = vcf_mp_seoni_chhindwara_kurai.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_vcf_mp_seoni_chhindwara_kurai = gpd.GeoDataFrame(vcf_mp_seoni_chhindwara_kurai, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# Filter for the years 2001 and 2020
+gdf_vcf_mp_seoni_chhindwara_kurai_2001 = gdf_vcf_mp_seoni_chhindwara_kurai[gdf_vcf_mp_seoni_chhindwara_kurai['year'] == 2001]["vcf_mean"].values
+gdf_vcf_mp_seoni_chhindwara_kurai_2020 = gdf_vcf_mp_seoni_chhindwara_kurai[gdf_vcf_mp_seoni_chhindwara_kurai['year'] == 2020]["vcf_mean"].values
+```
+
+```{python}
+# Calculate the mean for 2001 and 2020
+vcf_2001_mp_seoni_chhindwara_kurai = gdf_vcf_mp_seoni_chhindwara_kurai_2001.mean()
+vcf_2020_mp_seoni_chhindwara_kurai = gdf_vcf_mp_seoni_chhindwara_kurai_2020.mean()
+
+# Calculate percentage change
+percentage_change_fc_mp_seoni_chhindwara_kurai = ((vcf_2020_mp_seoni_chhindwara_kurai - vcf_2001_mp_seoni_chhindwara_kurai) / vcf_2001_mp_seoni_chhindwara_kurai) * 100
+print(f"Percentage change in VCF Mean from 2001 to 2020 in Kurai, Madhya Pradesh: {percentage_change_fc_mp_seoni_chhindwara_kurai:.2f}%")
+```
+
+Contrary to expectations, forest cover showed an increase rather than over the years. We observed this on an all-India level and also on subsequent levels of the states and districts in which the national parks are situated. Ramnagar, Uttarakhand (sub district in which Jim Corbett National Park is located) reported a 21.42% rise in VCF Mean from 2001 to 2020, and Kurai (village in which Pench National Park is located), Madhya Pradesh, observed a 3.95% increase. Essentially, the more commercialised national park saw a greater increase in forest cover. 
+![](pictures/forest_cover_jim_corbett.png)
+
+These findings prompted further investigation into the validity of the methodology of measuring forest cover. For this purpose, we conducted a polarity analysis by scraping 11 news articles. 
+
+```{python}
+from bs4 import BeautifulSoup
+import requests
+import spacy
+from spacytextblob.spacytextblob import SpacyTextBlob
+```
+
+```{python}
+# Scraping article 1
+article_1_url = "https://thegroundtruthproject.org/indias-new-state-of-forest-report-is-not-really-about-forests/"
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+
+response = requests.get(article_1_url, headers=headers)
+```
+
+```{python}
+soup = BeautifulSoup(response.text, "html.parser")
+paragraphs = soup.find_all("p")
+```
+
+```{python}
+article_1_text = "\n".join([p.get_text() for p in paragraphs])
+```
+
+```{python}
+with open("article_1.txt", "w", encoding="utf-8") as file:
+    file.write(article_1_text)
+```
+
+```{python}
+# polarity analysis
+nlp = spacy.load("en_core_web_sm")
+nlp.add_pipe("spacytextblob")
+
+
+doc_article_1 = nlp(article_1_text)
+```
+
+```{python}
+article_1_sentence_polarities = []
+
+for i, sentence in enumerate(doc_article_1.sents):
+    polarity = sentence._.blob.polarity
+    article_1_sentence_polarities.append({"n": i + 1, "article_1_polarity": polarity})
+
+print(f"Article 1 Polarity: {doc_article_1._.blob.polarity:.2f}")
+```
+
+```{python}
+# Scraping article 2
+article_2_url = "https://climatechangenews.com/2022/02/14/india-falsely-claims-forestry-progress-skewed-report-experts-warn/"
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+
+response_2 = requests.get(article_2_url, headers=headers)
+```
+
+```{python}
+soup = BeautifulSoup(response_2.text, "html.parser")
+paragraphs_2 = soup.find_all("p")
+```
+
+```{python}
+article_2_text = "\n".join([p.get_text() for p in paragraphs_2])
+```
+
+```{python}
+with open("article_2.txt", "w", encoding="utf-8") as file:
+    file.write(article_1_text)
+```
+
+```{python}
+doc_article_2 = nlp(article_2_text)
+```
+
+```{python}
+article_2_sentence_polarities = []
+
+for i, sentence in enumerate(doc_article_2.sents):
+    polarity = sentence._.blob.polarity
+    article_2_sentence_polarities.append({"n": i + 1, "article_2_polarity": polarity})
+
+print(f"Article 2 Polarity: {doc_article_2._.blob.polarity:.2f}")
+```
+
+```{python}
+# Scraping Article 3
+article_3_url = "https://india.mongabay.com/2018/05/reports-say-forest-cover-decreasing-contrary-to-government-claims/#:~:text=Multiple%20research%20reports%20find%20decrease,included%20in%20the%20forest%20survey."
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+
+response_3 = requests.get(article_3_url, headers=headers)
+```
+
+```{python}
+soup = BeautifulSoup(response_3.text, "html.parser")
+paragraphs_3 = soup.find_all("p")
+```
+
+```{python}
+article_3_text = "\n".join([p.get_text() for p in paragraphs_3])
+```
+
+```{python}
+with open("article_3.txt", "w", encoding="utf-8") as file:
+    file.write(article_3_text)
+```
+
+```{python}
+doc_article_3 = nlp(article_3_text)
+```
+
+```{python}
+article_3_sentence_polarities = []
+
+for i, sentence in enumerate(doc_article_3.sents):
+    polarity = sentence._.blob.polarity
+    article_3_sentence_polarities.append({"n": i + 1, "article_3_polarity": polarity})
+
+print(f"Article 3 Polarity: {doc_article_3._.blob.polarity:.2f}")
+```
+
+```{python}
+# Scraping Article 4
+article_4_url = "https://www.downtoearth.org.in/forests/india-identifying-defining-forests-wrongly-say-experts-at-anil-agarwal-dialogue-81801"
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+
+response_4 = requests.get(article_4_url, headers=headers)
+```
+
+```{python}
+soup = BeautifulSoup(response_4.text, "html.parser")
+paragraphs_4 = soup.find_all("p")
+```
+
+```{python}
+article_4_text = "\n".join([p.get_text() for p in paragraphs_4])
+```
+
+```{python}
+with open("article_4.txt", "w", encoding="utf-8") as file:
+    file.write(article_4_text)
+```
+
+```{python}
+doc_article_4 = nlp(article_4_text)
+```
+
+```{python}
+article_4_sentence_polarities = []
+
+for i, sentence in enumerate(doc_article_4.sents):
+    polarity = sentence._.blob.polarity
+    article_4_sentence_polarities.append({"n": i + 1, "article_4_polarity": polarity})
+
+print(f"Article 4 Polarity: {doc_article_4._.blob.polarity:.2f}")
+```
+
+```{python}
+# Scraping Article 5
+article_5_url = "https://www.conservationindia.org/articles/indias-fake-forests"
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+
+response_5 = requests.get(article_5_url, headers=headers)
+```
+
+```{python}
+soup = BeautifulSoup(response_5.text, "html.parser")
+paragraphs_5 = soup.find_all("p")
+```
+
+```{python}
+article_5_text = "\n".join([p.get_text() for p in paragraphs_5])
+```
+
+```{python}
+with open("article_5.txt", "w", encoding="utf-8") as file:
+    file.write(article_5_text)
+```
+
+```{python}
+doc_article_5 = nlp(article_5_text)
+```
+
+```{python}
+article_5_sentence_polarities = []
+
+for i, sentence in enumerate(doc_article_5.sents):
+    polarity = sentence._.blob.polarity
+    article_5_sentence_polarities.append({"n": i + 1, "article_5_polarity": polarity})
+
+print(f"Article 5 Polarity: {doc_article_5._.blob.polarity:.2f}")
+```
+
+```{python}
+# Scraping Article 6
+article_6_url = "https://www.newsclick.in/environment-india-identifying-defining-forests-wrongly-experts"
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+
+response_6 = requests.get(article_6_url, headers=headers)
+```
+
+```{python}
+soup = BeautifulSoup(response_6.text, "html.parser")
+paragraphs_6 = soup.find_all("p")
+```
+
+```{python}
+article_6_text = "\n".join([p.get_text() for p in paragraphs_6])
+```
+
+```{python}
+with open("article_6.txt", "w", encoding="utf-8") as file:
+    file.write(article_6_text)
+```
+
+```{python}
+doc_article_6 = nlp(article_6_text)
+```
+
+```{python}
+article_6_sentence_polarities = []
+
+for i, sentence in enumerate(doc_article_6.sents):
+    polarity = sentence._.blob.polarity
+    article_6_sentence_polarities.append({"n": i + 1, "article_6_polarity": polarity})
+
+print(f"Article 6 Polarity: {doc_article_6._.blob.polarity:.2f}")
+```
+
+```{python}
+# Scraping Article 7
+article_7_url = "https://www.downtoearth.org.in/forests/india-state-of-forest-report-delayed-by-a-year-concerns-rise-over-forest-data-integrity"
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+
+response_7 = requests.get(article_7_url, headers=headers)
+```
+
+```{python}
+soup = BeautifulSoup(response_7.text, "html.parser")
+paragraphs_7 = soup.find_all("p")
+```
+
+```{python}
+article_7_text = "\n".join([p.get_text() for p in paragraphs_7])
+```
+
+```{python}
+with open("article_7.txt", "w", encoding="utf-8") as file:
+    file.write(article_7_text)
+```
+
+```{python}
+doc_article_7 = nlp(article_7_text)
+```
+
+```{python}
+article_7_sentence_polarities = []
+
+for i, sentence in enumerate(doc_article_7.sents):
+    polarity = sentence._.blob.polarity
+    article_7_sentence_polarities.append({"n": i + 1, "article_7_polarity": polarity})
+
+print(f"Article 7 Polarity: {doc_article_7._.blob.polarity:.2f}")
+```
+
+```{python}
+# Scraping Article 8
+article_8_url = "https://carboncopy.info/the-unflattering-reality-of-the-lofty-plans-for-indias-forests/"
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+
+response_8 = requests.get(article_8_url, headers=headers)
+```
+
+```{python}
+soup = BeautifulSoup(response_8.text, "html.parser")
+paragraphs_8 = soup.find_all("p")
+```
+
+```{python}
+article_8_text = "\n".join([p.get_text() for p in paragraphs_8])
+```
+
+```{python}
+with open("article_8.txt", "w", encoding="utf-8") as file:
+    file.write(article_8_text)
+```
+
+```{python}
+doc_article_8 = nlp(article_8_text)
+```
+
+```{python}
+article_8_sentence_polarities = []
+
+for i, sentence in enumerate(doc_article_8.sents):
+    polarity = sentence._.blob.polarity
+    article_8_sentence_polarities.append({"n": i + 1, "article_8_polarity": polarity})
+
+print(f"Article 8 Polarity: {doc_article_8._.blob.polarity:.2f}")
+```
+
+```{python}
+# Scraping Article 9
+article_9_url = "https://india.mongabay.com/2022/01/analysis-indian-forests-around-the-size-of-nagaland-thinned-down-in-two-years/"
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+
+response_9 = requests.get(article_9_url, headers=headers)
+```
+
+```{python}
+soup = BeautifulSoup(response_9.text, "html.parser")
+paragraphs_9 = soup.find_all("p")
+```
+
+```{python}
+article_9_text = "\n".join([p.get_text() for p in paragraphs_9])
+```
+
+```{python}
+with open("article_9.txt", "w", encoding="utf-8") as file:
+    file.write(article_9_text)
+```
+
+```{python}
+doc_article_9 = nlp(article_9_text)
+```
+
+```{python}
+article_9_sentence_polarities = []
+
+for i, sentence in enumerate(doc_article_9.sents):
+    polarity = sentence._.blob.polarity
+    article_9_sentence_polarities.append({"n": i + 1, "article_9_polarity": polarity})
+
+print(f"Article 9 Polarity: {doc_article_9._.blob.polarity:.2f}")
+```
+
+```{python}
+# Scraping article 10
+article_10_url = "https://www.scientificamerican.com/article/indias-forest-area-in-doubt/"
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+
+response_10 = requests.get(article_10_url, headers=headers)
+```
+
+```{python}
+soup = BeautifulSoup(response_10.text, "html.parser")
+paragraphs_10 = soup.find_all("p")
+```
+
+```{python}
+article_10_text = "\n".join([p.get_text() for p in paragraphs_10])
+```
+
+```{python}
+with open("article_10.txt", "w", encoding="utf-8") as file:
+    file.write(article_10_text)
+```
+
+```{python}
+doc_article_10 = nlp(article_10_text)
+```
+
+```{python}
+article_10_sentence_polarities = []
+
+for i, sentence in enumerate(doc_article_10.sents):
+    polarity = sentence._.blob.polarity
+    article_10_sentence_polarities.append({"n": i + 1, "article_10_polarity": polarity})
+
+print(f"Article 10 Polarity: {doc_article_10._.blob.polarity:.2f}")
+```
+
+```{python}
+article_11_url = "https://www.theindiaforum.in/environment/swinging-axe-indias-forests"
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+
+response_11 = requests.get(article_11_url, headers=headers)
+```
+
+```{python}
+soup = BeautifulSoup(response_11.text, "html.parser")
+paragraphs_11 = soup.find_all("p")
+```
+
+```{python}
+article_11_text = "\n".join([p.get_text() for p in paragraphs_11])
+```
+
+Saving this file 
+
+```{python}
+with open("article_11.txt", "w", encoding="utf-8") as file:
+    file.write(article_11_text)
+```
+
+```{python}
+doc_article_11 = nlp(article_11_text)
+```
+
+```{python}
+article_11_sentence_polarities = []
+
+for i, sentence in enumerate(doc_article_11.sents):
+    polarity = sentence._.blob.polarity
+    article_11_sentence_polarities.append({"n": i + 1, "article_11_polarity": polarity})
+
+print(f"Article 11 Polarity: {doc_article_11._.blob.polarity:.2f}")
+```
+
+```{python}
+# Scraping Article 12
+article_12_url = "https://timesofindia.indiatimes.com/home/environment/global-warming/govt-claim-on-rise-in-forest-cover-false-study/articleshow/9178245.cms"
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+
+response_12 = requests.get(article_12_url, headers=headers)
+```
+
+```{python}
+soup = BeautifulSoup(response_12.text, "html.parser")
+paragraphs_12 = soup.find_all("p")
+```
+
+```{python}
+article_12_text = "\n".join([p.get_text() for p in paragraphs_12])
+```
+
+```{python}
+with open("article_12.txt", "w", encoding="utf-8") as file:
+    file.write(article_12_text)
+```
+
+```{python}
+doc_article_12 = nlp(article_12_text)
+```
+
+```{python}
+article_12_sentence_polarities = []
+
+for i, sentence in enumerate(doc_article_12.sents):
+    polarity = sentence._.blob.polarity
+    article_12_sentence_polarities.append({"n": i + 1, "article_12_polarity": polarity})
+
+print(f"Article 12 Polarity: {doc_article_12._.blob.polarity:.2f}")
+```
+
+We found that the polarities ranged from -0.03 to 0.15. This meant the articles were at most neutral and we suspect that it was essentially because there is some sort of an introduction in every news article which contributed to its “neutrality”. Essentially, these articles suggest the methodology of measuring forest cover is not accurate and hence, the real forest cover is not representative of the positive estimates of growing forest cover that are largely shown. 
