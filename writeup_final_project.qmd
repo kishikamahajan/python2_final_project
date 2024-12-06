@@ -16,7 +16,34 @@ include-before-body:
       breaksymbolleft={},
       breaklines
     }
+output:
+  echo: false
+  eval: false
 ---
+
+```{python}
+#| echo: true
+#| eval: false
+
+def print_file_contents(file_path):
+    """Print contents of a file."""
+    try:
+        with open(file_path, 'r') as f:
+            content = f.read()
+            print("python")
+            print(content)
+            print("")
+    except FileNotFoundError:
+        print("python")
+        print(f"Error: File '{file_path}' not found")
+        print("")
+    except Exception as e:
+        print("python") 
+        print(f"Error reading file: {e}")
+        print("")
+
+print_file_contents("/Users/kishikamahajan/Desktop/GitHub/python2_final_project/forest_cover_tourism/app.py") # Change accordingly
+```
 
 **Impact of Commercialisation on National Parks in India**
 
