@@ -1,0 +1,24 @@
+---
+title: "Impact of Commercialisation on National Parks in India"
+author: "Nidhi Srivastava (Section 4, ), Kishika Mahajan (Section 4, kishikamahajan)"
+date: today
+format: 
+  pdf:
+    include-in-header: 
+       text: |
+         \usepackage{fvextra}
+         \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
+include-before-body:
+  text: |
+    \RecustomVerbatimEnvironment{verbatim}{Verbatim}{
+      showspaces = false,
+      showtabs = false,
+      breaksymbolleft={},
+      breaklines
+    }
+---
+
+**Impact of Commercialisation on National Parks in India**
+
+As of 2023, there are 106 existing national parks in India covering an area of approximately 44,403 km2, which is 1.35% of the geographical area of the country. Many of these national parks, home to the ‘Royal Bengal Tigers’, have become prime tourist attractions of the country. India, with the effort of 50 years of Tiger conservation measures, now harbours almost 75% of the world's wild tiger population. Due to this remarkable increase in tiger sightings resulting from continuous conservation efforts, we have seen a commensurate increase in the higher commercialisation of national parks and tourist footfall. The goal of this study is to assess the implications of rising commercialisation on tiger population and further understand the sustainability of such conservation policies. The anticipated impacts of commercialization included forest cover depletion, a rise in tourism, increased economic activity, and a decline in wildlife populations.
+
