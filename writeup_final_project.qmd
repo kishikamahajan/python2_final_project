@@ -31,9 +31,11 @@ To analyse the forest cover and night lights, we essentially look at three years
 Essentially we make an exploration of how forest cover and night lights have evolved across the span of our study and draw comparison with tourism movements and wildlife census.
 
 The coding of the project mainly involves three parts: Forest Cover Analysis, Nightlight Analysis, Tourism Footfall Analysis and Shiny Dashboard App. The forest cover and nightlight code involves using static visualisations using libraries like matplotlib, altair and geopandas. The Shiny Dashboard code involves building a multi-page dashboard that shows a dynamic plot of forest cover evolution from 2001-2020. The second page tourism static trend lines in a comparative set up with a toggle and input list options. To further aid our analysis, we have also performed a Natural Language Processing analysis of various news reports on forest cover data collection and methodology. These news articles were web scraped using BeautifulSoup.
+
 **Forest Cover Analysis**
 
 ```{python}
+
 import pandas as pd
 import altair as alt
 import geopandas as gpd
@@ -1545,3 +1547,1698 @@ print(f"Article 12 Polarity: {doc_article_12._.blob.polarity:.2f}")
 ```
 
 We found that the polarities ranged from -0.03 to 0.15. This meant the articles were at most neutral and we suspect that it was essentially because there is some sort of an introduction in every news article which contributed to its “neutrality”. Essentially, these articles suggest the methodology of measuring forest cover is not accurate and hence, the real forest cover is not representative of the positive estimates of growing forest cover that are largely shown. 
+
+**Nighttime Lights Data Analysis**
+
+```{python}
+import pandas as pd
+import altair as alt
+import geopandas as gpd
+import matplotlib.pyplot as plt
+import numpy as np
+```
+
+```{python}
+# working only for 2000
+# reading the nighttime lights data for India
+
+nighttime_lights_india_1992_2013 = pd.read_csv("/Users/kishikamahajan/Desktop/python2_final_project/nighttime_lights/dmsp_shrid.csv")
+nighttime_lights_india_2001 = nighttime_lights_india_1992_2013[nighttime_lights_india_1992_2013["year"] == 2001]
+```
+
+```{python}
+# Loading the shrid location dictionary
+location_shrid = pd.read_csv("/Users/kishikamahajan/Desktop/python2_final_project/shrug-shrid-keys-csv/shrid_loc_names.csv")
+location_shrid.head()
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nighttime_lights_india_2001 = pd.merge(nighttime_lights_india_2001, location_shrid, on = "shrid2")
+```
+
+```{python}
+# Loading the coordinates' file
+coordinates_shrid = pd.read_csv("/Users/kishikamahajan/Desktop/python2_final_project/shrug-shrid-keys-csv/shrid2_spatial_stats.csv")
+coordinates_shrid.head()
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nighttime_lights_india_2001 = pd.merge(nighttime_lights_india_2001, coordinates_shrid, on = "shrid2")
+nighttime_lights_india_2001.head()
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nighttime_lights_india_2001["geometry"] = nighttime_lights_india_2001.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nighttime_lights_india_2001 = gpd.GeoDataFrame(nighttime_lights_india_2001, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# plotting 2001 only
+plot_2001_nightlights = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_nighttime_lights_india_2001.plot(
+    column = "dmsp_mean_light",  
+    cmap = "magma",      
+    legend = True,      
+    ax = ax
+)
+
+# Add a title and remove axes 
+ax.set_title("Nighttime Lights by Region", fontsize = 16)
+ax.axis("off")  
+plot_2001_nightlights
+```
+
+```{python}
+# Doing this for 2010
+nighttime_lights_india_2010 = nighttime_lights_india_1992_2013[nighttime_lights_india_1992_2013["year"] == 2010]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nighttime_lights_india_2010 = pd.merge(nighttime_lights_india_2010, location_shrid, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nighttime_lights_india_2010 = pd.merge(nighttime_lights_india_2010, coordinates_shrid, on = "shrid2")
+nighttime_lights_india_2010.head()
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nighttime_lights_india_2010["geometry"] = nighttime_lights_india_2010.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nighttime_lights_india_2010 = gpd.GeoDataFrame(nighttime_lights_india_2010, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# plotting 2001 only
+plot_2010_nightlights = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_nighttime_lights_india_2010.plot(
+    column = "dmsp_mean_light", 
+    cmap = "magma",   
+    legend = True,       
+    ax = ax
+)
+
+# Add a title and remove axes
+ax.set_title("Nighttime Lights by Region", fontsize = 16)
+ax.axis("off")  
+plot_2010_nightlights
+```
+
+```{python}
+nighttime_lights_india_2012_2022 = pd.read_csv("//Users/kishikamahajan/Desktop/python2_final_project/nighttime_lights/viirs_annual_shrid.csv")
+```
+
+```{python}
+nighttime_lights_india_2020 = nighttime_lights_india_2012_2022[nighttime_lights_india_2012_2022["year"] == 2020]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nighttime_lights_india_2020 = pd.merge(nighttime_lights_india_2020, location_shrid, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nighttime_lights_india_2020 = pd.merge(nighttime_lights_india_2020, coordinates_shrid, on = "shrid2")
+nighttime_lights_india_2020.head()
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nighttime_lights_india_2020["geometry"] = nighttime_lights_india_2020.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nighttime_lights_india_2020 = gpd.GeoDataFrame(nighttime_lights_india_2020, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# Adjust the plot with normalization
+from matplotlib.colors import LogNorm
+
+fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_nighttime_lights_india_2020.plot(
+    column="viirs_annual_mean",
+    cmap="magma",
+    legend=True,
+    ax=ax,
+    norm=LogNorm(vmin=0.1, vmax=287)  # Use log normalization
+)
+```
+
+```{python}
+# Set up a figure with subplots
+fig, axes = plt.subplots(1, 3, figsize=(18, 6))  # 1 row, 3 columns
+
+# Plot 2001
+gdf_nighttime_lights_india_2001.plot(
+    column='dmsp_mean_light', 
+    cmap='magma', 
+    legend=True, 
+    ax=axes[0]
+)
+axes[0].set_title("2001")
+axes[0].axis('off')
+
+# Plot 2010
+gdf_nighttime_lights_india_2010.plot(
+    column='dmsp_mean_light', 
+    cmap='magma', 
+    legend=True, 
+    ax=axes[1]
+)
+axes[1].set_title("2010")
+axes[1].axis('off')
+
+# Plot 2019 with LogNorm
+gdf_nighttime_lights_india_2020.plot(
+    column='viirs_annual_mean', 
+    cmap='magma', 
+    legend=True, 
+    ax=axes[2],
+    norm=LogNorm(vmin=0.1, vmax=287)  
+)
+axes[2].set_title("2020")
+axes[2].axis('off')
+
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+# Working on national parks
+# Jim corbett alone
+# Subsetting only Uttarakhand for the purposes of the Jim Corbett National Park
+
+uttarakhand_id = location_shrid[location_shrid["state_name"] == "uttarakhand"]
+```
+
+```{python}
+# As we can see that Uttarakhan starts with 11-05.
+# So, we can substitute this from the forest cover data as well. 
+nightlights_uk_2001 = nighttime_lights_india_2001[nighttime_lights_india_2001["shrid2"].str.startswith("11-05")]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nightlights_uk_2001 = pd.merge(nightlights_uk_2001, uttarakhand_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nightlights_uk_2001 = pd.merge(nightlights_uk_2001, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nightlights_uk_2001["geometry"] = nightlights_uk_2001.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_uk_2001 = gpd.GeoDataFrame(nightlights_uk_2001, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+india_state_shapefile = gpd.read_file("/Users/kishikamahajan/Desktop/python2_final_project/india_shapefiles/India_State_Boundary.shp")
+
+# getting only Uttarakhand
+uttarakhand_boundary = india_state_shapefile[india_state_shapefile["State_Name"] == "Uttarakhand"]
+
+uttarakhand_boundary = gpd.GeoDataFrame(uttarakhand_boundary, geometry='geometry')
+
+uttarakhand_boundary = uttarakhand_boundary.to_crs(gdf_nightlights_uk_2001.crs)
+```
+
+```{python}
+# plotting 2001 only
+plot_2001_uk_nightlights = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_nightlights_uk_2001.plot(
+    column = "dmsp_mean_light", 
+    cmap = "magma",   
+    legend = True,       
+    ax = ax
+)
+
+# Overlay Uttarakhand boundary
+uttarakhand_boundary.boundary.plot(
+    ax=ax,        
+    color="black",      
+    linewidth=2       
+)
+
+# Coordinates of the point
+latitude = 29.548599
+longitude = 78.935303
+
+# Add the point to the map
+ax.scatter(
+    longitude, latitude, 
+    color="red",  
+    marker="o",       
+    s=50,       
+    label="Point of Interest"  
+)
+
+# Add a title and remove axes 
+ax.set_title("Nightlights (vcf_mean) in Uttarakhand", fontsize = 16)
+ax.axis("off")  
+plot_2001_uk_nightlights
+```
+
+```{python}
+# Repeating the process for 2010
+nightlights_uk_2010 = nighttime_lights_india_2010[nighttime_lights_india_2010["shrid2"].str.startswith("11-05")]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nightlights_uk_2010 = pd.merge(nightlights_uk_2010, uttarakhand_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nightlights_uk_2010 = pd.merge(nightlights_uk_2010, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nightlights_uk_2010["geometry"] = nightlights_uk_2010.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_uk_2010 = gpd.GeoDataFrame(nightlights_uk_2010, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# plotting 2001 only
+plot_2010_uk_nightlights = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_nightlights_uk_2010.plot(
+    column = "dmsp_mean_light",  
+    cmap = "magma",     
+    legend = True,      
+    ax = ax
+)
+
+# Overlay Uttarakhand boundary
+uttarakhand_boundary.boundary.plot(
+    ax=ax,          
+    color="black", 
+    linewidth=2       
+)
+
+# Coordinates of the point
+latitude = 29.548599
+longitude = 78.935303
+
+# Add the point to the map
+ax.scatter(
+    longitude, latitude,  
+    color="red",          
+    marker="o",        
+    s=50,   
+    label="Point of Interest" 
+)
+
+# Add a title and remove axes 
+ax.set_title("Nightlights (vcf_mean) in Uttarakhand", fontsize = 16)
+ax.axis("off")  
+plot_2010_uk_nightlights
+```
+
+```{python}
+# Doing the same for 2020
+nightlights_uk_2020 = nighttime_lights_india_2020[nighttime_lights_india_2020["shrid2"].str.startswith("11-05")]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nightlights_uk_2020 = pd.merge(nightlights_uk_2020, uttarakhand_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nightlights_uk_2020 = pd.merge(nightlights_uk_2020, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nightlights_uk_2020["geometry"] = nightlights_uk_2020.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_uk_2020 = gpd.GeoDataFrame(nightlights_uk_2020, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# plotting 2001 only
+plot_2020_uk_nightlights = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_nightlights_uk_2020.plot(
+    column="viirs_annual_mean",
+    cmap="magma",
+    legend=True,
+    ax=ax,
+    norm=LogNorm(vmin=0.1, vmax=287)  # Use log normalization
+)
+
+# Overlay Uttarakhand boundary
+uttarakhand_boundary.boundary.plot(
+    ax=ax,              
+    color="black",      
+    linewidth=2      
+)
+
+# Coordinates of the point
+latitude = 29.548599
+longitude = 78.935303
+
+# Add the point to the map
+ax.scatter(
+    longitude, latitude,  
+    color="red",      
+    marker="o",       
+    s=50,       
+    label="Point of Interest"  
+)
+
+# Add a title and remove axes 
+ax.set_title("Nightlights (vcf_mean) in Uttarakhand", fontsize = 16)
+ax.axis("off")  
+plot_2020_uk_nightlights
+```
+
+```{python}
+# For subplots
+fig, axes = plt.subplots(1, 3, figsize=(18, 6))  # 1 row, 3 columns
+
+# Plot 2001
+gdf_nightlights_uk_2001.plot(
+    column='dmsp_mean_light', 
+    cmap='magma', 
+    legend=True, 
+    ax=axes[0]
+)
+axes[0].set_title("2001")
+axes[0].axis('off')
+
+uttarakhand_boundary.boundary.plot(ax=axes[0], color="black", linewidth=2)
+axes[0].scatter(longitude, latitude, color="red", marker="o", s=50, label="Jim Corbett National Park")
+axes[0].legend()  
+
+# Plot 2010
+gdf_nightlights_uk_2010.plot(
+    column='dmsp_mean_light', 
+    cmap='magma', 
+    legend=True, 
+    ax=axes[1]
+)
+axes[1].set_title("2010")
+axes[1].axis('off')
+
+# Overlay Uttarakhand boundary and the point for 2010
+uttarakhand_boundary.boundary.plot(ax=axes[1], color="black", linewidth=2)
+axes[1].scatter(longitude, latitude, color="red", marker="o", s=50, label="Jim Corbett National Park")
+axes[1].legend()  
+
+# Plot 2019 with LogNorm
+gdf_nightlights_uk_2020.plot(
+    column='viirs_annual_mean', 
+    cmap='magma', 
+    legend=True, 
+    ax=axes[2],
+    norm=LogNorm(vmin=0.1, vmax=287)  
+)
+axes[2].set_title("2020")
+axes[2].axis('off')
+
+# Overlay Uttarakhand boundary and the point for 2020
+uttarakhand_boundary.boundary.plot(ax=axes[2], color="black", linewidth=2)
+axes[2].scatter(longitude, latitude, color="red", marker="o", s=50, label="Jim Corbett National Park")
+axes[2].legend()  
+
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+# Looking at just Nainital
+nainital_id = uttarakhand_id[uttarakhand_id["district_name"] == "nainital"]
+```
+
+```{python}
+# As we can see that Nainital starts with 11-05-066.
+# So, we can substitute this from the forest cover data as well. 
+nightlights_uttarakhand_nainital_2001 = nighttime_lights_india_2001[nighttime_lights_india_2001["shrid2"].str.startswith("11-05-066")]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nightlights_uttarakhand_nainital_2001 = pd.merge(nightlights_uttarakhand_nainital_2001, nainital_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nightlights_uttarakhand_nainital_2001 = pd.merge(nightlights_uttarakhand_nainital_2001, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nightlights_uttarakhand_nainital_2001["geometry"] = nightlights_uttarakhand_nainital_2001.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_uttarakhand_nainital_2001 = gpd.GeoDataFrame(nightlights_uttarakhand_nainital_2001, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+district_boundaries = gpd.read_file("/Users/kishikamahajan/Desktop/python2_final_project/india_shapefiles/shrug-pc11dist-poly-shp/district.shp")
+
+# getting only nainital district
+nainital_boundaries = district_boundaries[district_boundaries["pc11_d_id"] == "066"]
+nainital_boundaries = gpd.GeoDataFrame(nainital_boundaries, geometry='geometry')
+nainital_boundaries = nainital_boundaries.to_crs(gdf_nightlights_uttarakhand_nainital_2001.crs)
+```
+
+```{python}
+# plotting 2001 only
+plot_2001_uk_nainital_nightlights = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_nightlights_uttarakhand_nainital_2001.plot(
+    column = "dmsp_mean_light",  
+    cmap = "magma",     
+    legend = True,       
+    ax = ax
+)
+
+# Overlay Nainital boundary
+nainital_boundaries.boundary.plot(
+    ax=ax,           
+    color="black",      
+    linewidth=2     
+)
+
+# Add a title and remove axes 
+ax.set_title("Nightlights in Nainital, Utarakhand", fontsize = 16)
+ax.axis("off")  
+plot_2001_uk_nainital_nightlights
+```
+
+```{python}
+nightlights_uttarakhand_nainital_2010 = nighttime_lights_india_2010[nighttime_lights_india_2010["shrid2"].str.startswith("11-05-066")]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nightlights_uttarakhand_nainital_2010 = pd.merge(nightlights_uttarakhand_nainital_2010, nainital_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nightlights_uttarakhand_nainital_2010 = pd.merge(nightlights_uttarakhand_nainital_2010, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nightlights_uttarakhand_nainital_2010["geometry"] = nightlights_uttarakhand_nainital_2010.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_uttarakhand_nainital_2010 = gpd.GeoDataFrame(nightlights_uttarakhand_nainital_2010, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# plotting 2010 only
+plot_2010_uk_nainital_nightlights = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_nightlights_uttarakhand_nainital_2010.plot(
+    column = "dmsp_mean_light", 
+    cmap = "magma",
+    legend = True,      
+    ax = ax
+)
+
+# Overlay Nainital boundary
+nainital_boundaries.boundary.plot(
+    ax=ax,             
+    color="black",     
+    linewidth=2        
+)
+
+# Add a title and remove axes for clarity
+ax.set_title("Nightlights in Nainital, Utarakhand", fontsize = 16)
+ax.axis("off")  
+plot_2010_uk_nainital_nightlights
+```
+
+```{python}
+# Doing the same for 2020
+nightlights_uttarakhand_nainital_2020 = nighttime_lights_india_2020[nighttime_lights_india_2020["shrid2"].str.startswith("11-05-066")]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nightlights_uttarakhand_nainital_2020 = pd.merge(nightlights_uttarakhand_nainital_2020, nainital_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nightlights_uttarakhand_nainital_2020 = pd.merge(nightlights_uttarakhand_nainital_2020, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nightlights_uttarakhand_nainital_2020["geometry"] = nightlights_uttarakhand_nainital_2020.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_uttarakhand_nainital_2020 = gpd.GeoDataFrame(nightlights_uttarakhand_nainital_2020, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# plotting 2001 only
+plot_2020_uk_nainital_nightlights = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_nightlights_uttarakhand_nainital_2020.plot(
+    column="viirs_annual_mean",
+    cmap="magma",
+    legend=True,
+    ax=ax,
+    norm=LogNorm(vmin=0.1, vmax=287)  # Use log normalization
+)
+
+
+# Overlay Uttarakhand boundary
+nainital_boundaries.boundary.plot(
+    ax=ax,      
+    color="black",      
+    linewidth=2       
+)
+
+# Add a title and remove axes
+ax.set_title("Nightlights in Nainital, Utarakhand", fontsize = 16)
+ax.axis("off")  
+plot_2020_uk_nainital_nightlights
+```
+
+```{python}
+# For subplots
+fig, axes = plt.subplots(1, 3, figsize=(18, 6))  # 1 row, 3 columns
+
+# Plot 2001
+gdf_nightlights_uttarakhand_nainital_2001.plot(
+    column='dmsp_mean_light', 
+    cmap='magma', 
+    legend=True, 
+    ax=axes[0]
+)
+axes[0].set_title("2001")
+axes[0].axis('off')
+
+# Overlay Nainital boundary for 2001
+nainital_boundaries.boundary.plot(ax=axes[0], color="black", linewidth=2)
+
+# Plot 2010
+gdf_nightlights_uttarakhand_nainital_2010.plot(
+    column='dmsp_mean_light', 
+    cmap='magma', 
+    legend=True, 
+    ax=axes[1]
+)
+axes[1].set_title("2010")
+axes[1].axis('off')
+
+# Overlay Nainital boundary for 2010
+nainital_boundaries.boundary.plot(ax=axes[1], color="black", linewidth=2)
+
+# Plot 2020 with LogNorm
+gdf_nightlights_uttarakhand_nainital_2020.plot(
+    column='viirs_annual_mean', 
+    cmap='magma', 
+    legend=True, 
+    ax=axes[2],
+    norm=LogNorm(vmin=0.1, vmax=287)  
+)
+axes[2].set_title("2020")
+axes[2].axis('off')
+
+# Overlay Nainital boundary and the point for 2010
+nainital_boundaries.boundary.plot(ax=axes[2], color="black", linewidth=2)
+
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+# looking at just pench
+# Subsetting only Madhya Pradesh for the purposes of the Pench National Park
+
+mp_id = location_shrid[location_shrid["state_name"] == "madhya pradesh"]
+```
+
+```{python}
+# As we can see that Madhya Pradesh starts with 11-23.
+# So, we can substitute this from the forest cover data as well. 
+nightlights_mp_2001 = nighttime_lights_india_2001[nighttime_lights_india_2001["shrid2"].str.startswith("11-23")]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nightlights_mp_2001 = pd.merge(nightlights_mp_2001, mp_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nightlights_mp_2001 = pd.merge(nightlights_mp_2001, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nightlights_mp_2001["geometry"] = nightlights_mp_2001.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_mp_2001 = gpd.GeoDataFrame(nightlights_mp_2001, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+india_state_shapefile = gpd.read_file("/Users/kishikamahajan/Desktop/python2_final_project/india_shapefiles/India_State_Boundary.shp")
+
+# getting only Uttarakhand
+mp_boundary = india_state_shapefile[india_state_shapefile["State_Name"] == "Madhya Pradesh"]
+
+mp_boundary = gpd.GeoDataFrame(mp_boundary, geometry='geometry')
+
+mp_boundary = mp_boundary.to_crs(gdf_nightlights_mp_2001.crs)
+```
+
+```{python}
+# plotting 2001 only
+plot_2001_mp = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_nightlights_mp_2001.plot(
+    column = "dmsp_mean_light", 
+    cmap = "magma",     
+    legend = True,      
+    ax = ax
+)
+
+# Overlay MP boundary
+mp_boundary.boundary.plot(
+    ax=ax,          
+    color="black", 
+    linewidth=2        
+)
+
+# Coordinates of the point
+latitude = 22.016617
+longitude = 79.829674
+
+# Add the point to the map
+ax.scatter(
+    longitude, latitude,
+    color="red",  
+    marker="o",      
+    s=50,             
+    label="Point of Interest"  
+)
+
+# Add a title and remove axes 
+ax.set_title("Forest Cover (vcf_mean) in Madhya Pradesh", fontsize = 16)
+ax.axis("off")  
+plot_2001_mp
+```
+
+```{python}
+nightlights_mp_2010 = nighttime_lights_india_2010[nighttime_lights_india_2010["shrid2"].str.startswith("11-23")]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nightlights_mp_2010 = pd.merge(nightlights_mp_2010, mp_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nightlights_mp_2010 = pd.merge(nightlights_mp_2010, coordinates_shrid, on = "shrid2")
+```
+
+Converting this into a spatial object
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nightlights_mp_2010["geometry"] = nightlights_mp_2010.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_mp_2010 = gpd.GeoDataFrame(nightlights_mp_2010, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+india_state_shapefile = gpd.read_file("/Users/kishikamahajan/Desktop/python2_final_project/india_shapefiles/India_State_Boundary.shp")
+
+# getting only Uttarakhand
+mp_boundary = india_state_shapefile[india_state_shapefile["State_Name"] == "Madhya Pradesh"]
+
+mp_boundary = gpd.GeoDataFrame(mp_boundary, geometry='geometry')
+
+mp_boundary = mp_boundary.to_crs(gdf_nightlights_mp_2001.crs)
+```
+
+```{python}
+# plotting 2010 only
+plot_2010_mp = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_nightlights_mp_2010.plot(
+    column = "dmsp_mean_light",  
+    cmap = "magma",      
+    legend = True,   
+    ax = ax
+)
+
+# Overlay Uttarakhand boundary
+mp_boundary.boundary.plot(
+    ax=ax,     
+    color="black",   
+    linewidth=2        
+)
+
+# Coordinates of the point
+latitude = 22.016617
+longitude = 79.829674
+
+# Add the point to the map
+ax.scatter(
+    longitude, latitude,  
+    color="red",        
+    marker="o",       
+    s=50,         
+    label="Point of Interest"  
+)
+
+# Add a title and remove axes for clarity
+ax.set_title("Nighttime Lights (vcf_mean) in Madhya Pradesh", fontsize = 16)
+ax.axis("off")  
+plot_2010_mp
+```
+
+```{python}
+# Repeating the process for 2020
+nightlights_mp_2020 = nighttime_lights_india_2020[nighttime_lights_india_2020["shrid2"].str.startswith("11-23")]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nightlights_mp_2020 = pd.merge(nightlights_mp_2020, mp_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nightlights_mp_2020 = pd.merge(nightlights_mp_2020, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nightlights_mp_2020["geometry"] = nightlights_mp_2020.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_mp_2020 = gpd.GeoDataFrame(nightlights_mp_2020, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+india_state_shapefile = gpd.read_file("/Users/kishikamahajan/Desktop/python2_final_project/india_shapefiles/India_State_Boundary.shp")
+
+# getting only Uttarakhand
+mp_boundary = india_state_shapefile[india_state_shapefile["State_Name"] == "Madhya Pradesh"]
+
+mp_boundary = gpd.GeoDataFrame(mp_boundary, geometry='geometry')
+
+mp_boundary = mp_boundary.to_crs(gdf_nightlights_mp_2020.crs)
+```
+
+```{python}
+# plotting 2020 only
+plot_2020_mp = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_nightlights_mp_2020.plot(
+    column="viirs_annual_mean",
+    cmap="magma",
+    legend=True,
+    ax=ax,
+    norm=LogNorm(vmin=0.1, vmax=287)  # Use log normalization
+)
+
+
+# Overlay Uttarakhand boundary
+mp_boundary.boundary.plot(
+    ax=ax,     
+    color="black",     
+    linewidth=2      
+)
+
+# Coordinates of the point
+latitude = 22.016617
+longitude = 79.829674
+
+# Add the point to the map
+ax.scatter(
+    longitude, latitude, 
+    color="red",     
+    marker="o",   
+    s=50,           
+    label="Point of Interest"  
+)
+
+# Add a title and remove axes for clarity
+ax.set_title("Nighttime Lights in Madhya Pradesh", fontsize = 16)
+ax.axis("off")  
+plot_2020_mp
+```
+
+```{python}
+# For subplots
+fig, axes = plt.subplots(1, 3, figsize=(18, 6))  # 1 row, 3 columns
+
+# Plot 2001
+gdf_nightlights_mp_2001.plot(
+    column='dmsp_mean_light', 
+    cmap='magma', 
+    legend=True, 
+    ax=axes[0]
+)
+axes[0].set_title("2001")
+axes[0].axis('off')
+
+# Overlay MP boundary and the point for 2001
+mp_boundary.boundary.plot(ax=axes[0], color="black", linewidth=2)
+axes[0].scatter(longitude, latitude, color="red", marker="o", s=50, label="Pench National Park")
+axes[0].legend()  
+
+# Plot 2010
+gdf_nightlights_mp_2010.plot(
+    column='dmsp_mean_light', 
+    cmap='magma', 
+    legend=True, 
+    ax=axes[1]
+)
+axes[1].set_title("2010")
+axes[1].axis('off')
+
+# Overlay MP boundary and the point for 2010
+mp_boundary.boundary.plot(ax=axes[1], color="black", linewidth=2)
+axes[1].scatter(longitude, latitude, color="red", marker="o", s=50, label="Pench National Park")
+axes[1].legend() 
+
+# Plot 2020 with LogNorm
+gdf_nightlights_mp_2020.plot(
+    column='viirs_annual_mean', 
+    cmap='magma', 
+    legend=True, 
+    ax=axes[2],
+    norm=LogNorm(vmin=0.1, vmax=287)  
+)
+axes[2].set_title("2020")
+axes[2].axis('off')
+
+# Overlay MP boundary and the point for 2020
+mp_boundary.boundary.plot(ax=axes[2], color="black", linewidth=2)
+axes[2].scatter(longitude, latitude, color="red", marker="o", s=50, label="Pench National Park")
+axes[2].legend()  
+
+plt.tight_layout()
+plt.show()
+```
+
+```{python}
+# We can also look at just Seoni and Chhindwara to get a clearer analysis
+seoni_chhindwara_id = mp_id[(mp_id["district_name"] == "seoni") | (mp_id["district_name"] == "chhindwara")]
+```
+
+```{python}
+# As we can see that these districts start with 11-23-455 and 11-23-456.
+# So, we can substitute this from the nighttime data as well. 
+
+nightlights_mp_seoni_chhindwara_2001 = nighttime_lights_india_2001[
+    (nighttime_lights_india_2001["shrid2"].str.startswith("11-23-455")) | 
+    (nighttime_lights_india_2001["shrid2"].str.startswith("11-23-456"))
+]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nightlights_mp_seoni_chhindwara_2001 = pd.merge(nightlights_mp_seoni_chhindwara_2001, seoni_chhindwara_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nightlights_mp_seoni_chhindwara_2001 = pd.merge(nightlights_mp_seoni_chhindwara_2001, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nightlights_mp_seoni_chhindwara_2001["geometry"] = nightlights_mp_seoni_chhindwara_2001.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_mp_seoni_chhindwara_2001 = gpd.GeoDataFrame(nightlights_mp_seoni_chhindwara_2001, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+district_boundaries = gpd.read_file("/Users/kishikamahajan/Desktop/python2_final_project/india_shapefiles/shrug-pc11dist-poly-shp/district.shp")
+
+# getting only seoni and chhindwara district
+seoni_chhindwara_boundaries = district_boundaries[
+    (district_boundaries["pc11_d_id"] == "455") | 
+    (district_boundaries["pc11_d_id"] == "456")]
+seoni_chhindwara_boundaries = gpd.GeoDataFrame(seoni_chhindwara_boundaries, geometry='geometry')
+seoni_chhindwara_boundaries = seoni_chhindwara_boundaries.to_crs(gdf_nightlights_mp_seoni_chhindwara_2001.crs)
+```
+
+```{python}
+# plotting 2001 only
+plot_2001_mp_seoni_chhindwara_nightlights = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_nightlights_mp_seoni_chhindwara_2001.plot(
+    column = "dmsp_mean_light",  
+    cmap = "magma",      
+    legend = True,   
+    ax = ax
+)
+
+# Overlay Uttarakhand boundary
+seoni_chhindwara_boundaries.boundary.plot(
+    ax=ax,          
+    color="black",      
+    linewidth=2       
+)
+
+# Add a title and remove axes for clarity
+ax.set_title("Nightlights in Seoni and Chhindwara, Madhya Pradesh", fontsize = 16)
+ax.axis("off")  
+plot_2001_mp_seoni_chhindwara_nightlights
+```
+
+```{python}
+# Doing the same for 2010
+nightlights_mp_seoni_chhindwara_2010 = nighttime_lights_india_2010[
+    (nighttime_lights_india_2010["shrid2"].str.startswith("11-23-455")) | 
+    (nighttime_lights_india_2010["shrid2"].str.startswith("11-23-456"))
+]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nightlights_mp_seoni_chhindwara_2010 = pd.merge(nightlights_mp_seoni_chhindwara_2010, seoni_chhindwara_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nightlights_mp_seoni_chhindwara_2010 = pd.merge(nightlights_mp_seoni_chhindwara_2010, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nightlights_mp_seoni_chhindwara_2010["geometry"] = nightlights_mp_seoni_chhindwara_2010.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_mp_seoni_chhindwara_2010 = gpd.GeoDataFrame(nightlights_mp_seoni_chhindwara_2010, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# plotting 2010 only
+plot_2010_mp_seoni_chhindwara_nightlights = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_nightlights_mp_seoni_chhindwara_2010.plot(
+    column = "dmsp_mean_light", 
+    cmap = "magma",  
+    legend = True,     
+    ax = ax
+)
+
+# Overlay Uttarakhand boundary
+seoni_chhindwara_boundaries.boundary.plot(
+    ax=ax,      
+    color="black",    
+    linewidth=2       
+)
+
+# Add a title and remove axes 
+ax.set_title("Nightlights in Seoni and Chhindwara, Madhya Pradesh", fontsize = 16)
+ax.axis("off")  
+plot_2010_mp_seoni_chhindwara_nightlights
+```
+
+```{python}
+# Doing the same for 2020
+
+nightlights_mp_seoni_chhindwara_2020 = nighttime_lights_india_2020[
+    (nighttime_lights_india_2020["shrid2"].str.startswith("11-23-455")) | 
+    (nighttime_lights_india_2020["shrid2"].str.startswith("11-23-456"))
+]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nightlights_mp_seoni_chhindwara_2020 = pd.merge(nightlights_mp_seoni_chhindwara_2020, seoni_chhindwara_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nightlights_mp_seoni_chhindwara_2020 = pd.merge(nightlights_mp_seoni_chhindwara_2020, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nightlights_mp_seoni_chhindwara_2020["geometry"] = nightlights_mp_seoni_chhindwara_2020.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_mp_seoni_chhindwara_2020 = gpd.GeoDataFrame(nightlights_mp_seoni_chhindwara_2020, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# plotting 2020 only
+plot_2020_mp_seoni_chhindwara_nightlights = fig, ax = plt.subplots(1, 1, figsize=(10, 8))
+gdf_nightlights_mp_seoni_chhindwara_2020.plot(
+    column = "viirs_annual_mean", 
+    cmap = "magma",  
+    legend = True,     
+    ax = ax,
+    norm=LogNorm(vmin=0.1, vmax=287)
+)
+
+# Overlay Uttarakhand boundary
+seoni_chhindwara_boundaries.boundary.plot(
+    ax=ax,        
+    color="black",   
+    linewidth=2    
+)
+
+# Add a title and remove axes for clarity
+ax.set_title("Nightlights in Seoni and Chhindwara, Madhya Pradesh", fontsize = 16)
+ax.axis("off")  
+plot_2020_mp_seoni_chhindwara_nightlights
+```
+
+```{python}
+# Set up a figure with subplots
+fig, axes = plt.subplots(1, 3, figsize=(18, 6))  # 1 row, 3 columns
+
+# Plot 2001
+gdf_nightlights_mp_seoni_chhindwara_2001.plot(
+    column='dmsp_mean_light', 
+    cmap='magma', 
+    legend=True, 
+    ax=axes[0]
+)
+axes[0].set_title("2001")
+axes[0].axis('off')
+
+# Overlay SC boundary for 2001
+seoni_chhindwara_boundaries.boundary.plot(ax=axes[0], color="black", linewidth=2)
+axes[0].scatter(longitude, latitude, color="red", marker="o", s=50, label="Pench National Park")
+axes[0].legend()
+
+# Plot 2010
+gdf_nightlights_mp_seoni_chhindwara_2010.plot(
+    column='dmsp_mean_light', 
+    cmap='magma', 
+    legend=True, 
+    ax=axes[1]
+)
+axes[1].set_title("2010")
+axes[1].axis('off')
+
+# Overlay SC boundary for 2010
+seoni_chhindwara_boundaries.boundary.plot(ax=axes[1], color="black", linewidth=2)
+
+# Plot 2019 with LogNorm
+gdf_nightlights_mp_seoni_chhindwara_2020.plot(
+    column='viirs_annual_mean', 
+    cmap='magma', 
+    legend=True, 
+    ax=axes[2],
+    norm=LogNorm(vmin=0.1, vmax=287)  
+)
+axes[2].set_title("2020")
+axes[2].axis('off')
+
+# Overlay SC boundary for 2020
+seoni_chhindwara_boundaries.boundary.plot(ax=axes[2], color="black", linewidth=2)
+
+plt.tight_layout()
+plt.show()
+```
+
+**Looking at Percentage Increases**
+
+```{python}
+# The Jim Corbett National Park is in the Ramnagar subdistrict of Nainital district in Uttarakhand. 
+value_to_check = 'ramnagar'
+
+# Using `in` operator
+if value_to_check in nainital_id['subdistrict_name'].values:
+    print(f"{value_to_check} is present in the 'subdistrict_name' column.")
+```
+
+```{python}
+# getting only ramnagar
+ramnagar_id = nainital_id[nainital_id["subdistrict_name"] == "ramnagar"]
+```
+
+```{python}
+nightlights_uttarakhand_nainital_ramnagar_2001 = nightlights_uttarakhand_nainital_2001[nightlights_uttarakhand_nainital_2001["shrid2"].str.startswith("11-05-066-00343")]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nightlights_uttarakhand_nainital_ramnagar_2001 = pd.merge(nightlights_uttarakhand_nainital_ramnagar_2001, ramnagar_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nightlights_uttarakhand_nainital_ramnagar_2001 = pd.merge(nightlights_uttarakhand_nainital_ramnagar_2001, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nightlights_uttarakhand_nainital_ramnagar_2001["geometry"] = nightlights_uttarakhand_nainital_ramnagar_2001.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_uttarakhand_nainital_ramnagar_2001 = gpd.GeoDataFrame(nightlights_uttarakhand_nainital_ramnagar_2001, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# Filter for the years 2001
+gdf_nightlights_uttarakhand_nainital_ramnagar_2001 = gdf_nightlights_uttarakhand_nainital_ramnagar_2001[gdf_nightlights_uttarakhand_nainital_ramnagar_2001['year'] == 2001]["dmsp_mean_light"].values
+```
+
+```{python}
+# Calculate the mean for 2001 and 2020
+dmsp_2001_uttarakhand_nainital_ramnagar = gdf_nightlights_uttarakhand_nainital_ramnagar_2001.mean()
+```
+
+```{python}
+nightlights_uttarakhand_nainital_ramnagar_2010 = nightlights_uttarakhand_nainital_2010[nightlights_uttarakhand_nainital_2010["shrid2"].str.startswith("11-05-066-00343")]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nightlights_uttarakhand_nainital_ramnagar_2010 = pd.merge(nightlights_uttarakhand_nainital_ramnagar_2010, ramnagar_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nightlights_uttarakhand_nainital_ramnagar_2010 = pd.merge(nightlights_uttarakhand_nainital_ramnagar_2010, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nightlights_uttarakhand_nainital_ramnagar_2010["geometry"] = nightlights_uttarakhand_nainital_ramnagar_2010.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_uttarakhand_nainital_ramnagar_2010 = gpd.GeoDataFrame(nightlights_uttarakhand_nainital_ramnagar_2010, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# Filter for the years 2010
+gdf_nightlights_uttarakhand_nainital_ramnagar_2010 = gdf_nightlights_uttarakhand_nainital_ramnagar_2010[gdf_nightlights_uttarakhand_nainital_ramnagar_2010['year'] == 2010]["dmsp_mean_light"].values
+```
+
+```{python}
+# Calculate the mean for 2010
+dmsp_2010_uttarakhand_nainital_ramnagar = gdf_nightlights_uttarakhand_nainital_ramnagar_2010.mean()
+```
+
+```{python}
+percentage_change_nl_mp_uttarakhand_nainital_ramnagar = ((dmsp_2010_uttarakhand_nainital_ramnagar - dmsp_2001_uttarakhand_nainital_ramnagar) / dmsp_2001_uttarakhand_nainital_ramnagar) * 100
+print(f"Percentage change in nightlights from 2001 to 2010 in Ramnagar, Nainital, Uttarakhand: {percentage_change_nl_mp_uttarakhand_nainital_ramnagar:.2f}%")
+```
+
+```{python}
+nighttime_lights_india_2012 = nighttime_lights_india_2012_2022[nighttime_lights_india_2012_2022["year"] == 2012]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nighttime_lights_india_2012 = pd.merge(nighttime_lights_india_2012, location_shrid, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nighttime_lights_india_2012 = pd.merge(nighttime_lights_india_2012, coordinates_shrid, on = "shrid2")
+nighttime_lights_india_2012.head()
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nighttime_lights_india_2012["geometry"] = nighttime_lights_india_2012.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+nightlights_uttarakhand_nainital_ramnagar_2012 = nighttime_lights_india_2012[nighttime_lights_india_2012["shrid2"].str.startswith("11-05-066-00343")]
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_uttarakhand_nainital_ramnagar_2012 = gpd.GeoDataFrame(nightlights_uttarakhand_nainital_ramnagar_2012, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# Calculate the mean for 2010
+log_viirs_2012_uttarakhand_nainital_ramnagar = np.log1p(
+    gdf_nightlights_uttarakhand_nainital_ramnagar_2012["viirs_annual_mean"]
+)
+
+# Calculate the mean of the log-transformed values
+log_mean_viirs_2012 = log_viirs_2012_uttarakhand_nainital_ramnagar.mean()
+```
+
+```{python}
+nightlights_uttarakhand_nainital_ramnagar_2020 = nighttime_lights_india_2020[nighttime_lights_india_2020["shrid2"].str.startswith("11-05-066-00343")]
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_uttarakhand_nainital_ramnagar_2020 = gpd.GeoDataFrame(nightlights_uttarakhand_nainital_ramnagar_2020, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# Calculate the mean for 2010
+log_viirs_2020_uttarakhand_nainital_ramnagar = np.log1p(
+    gdf_nightlights_uttarakhand_nainital_ramnagar_2020["viirs_annual_mean"]
+)
+
+# Calculate the mean of the log-transformed values
+log_mean_viirs_2020 = log_viirs_2020_uttarakhand_nainital_ramnagar.mean()
+```
+
+```{python}
+percentage_change_nl_uttarakhand_nainital_ramnagar_2012_2020 = ((log_mean_viirs_2020 - log_mean_viirs_2012) / log_mean_viirs_2012) * 100
+print(f"Percentage change in nightlights from 2012 to 2020 in Ramnagar, Nainital, Uttarakhand: {percentage_change_nl_uttarakhand_nainital_ramnagar_2012_2020:.2f}%")
+```
+
+```{python}
+# Pench National Park is located in the Kurai village of Madhya Pradesh district. 
+# Looking at just Kurai village. 
+# getting only kurai
+kurai_id = seoni_chhindwara_id[seoni_chhindwara_id["village_name"] == "kurai"]
+```
+
+```{python}
+nightlights_mp_seoni_chhindwara_kurai_2001 = nightlights_mp_seoni_chhindwara_2001[
+    (nightlights_mp_seoni_chhindwara_2001["shrid2"].str.startswith("11-23-455-03657-495377")) |
+    (nightlights_mp_seoni_chhindwara_2001["shrid2"].str.startswith("11-23-456-03666-497170"))]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nightlights_mp_seoni_chhindwara_kurai_2001 = pd.merge(nightlights_mp_seoni_chhindwara_kurai_2001, kurai_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nightlights_mp_seoni_chhindwara_kurai_2001 = pd.merge(nightlights_mp_seoni_chhindwara_kurai_2001, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nightlights_mp_seoni_chhindwara_kurai_2001["geometry"] = nightlights_mp_seoni_chhindwara_kurai_2001.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_mp_seoni_chhindwara_kurai_2001 = gpd.GeoDataFrame(nightlights_mp_seoni_chhindwara_kurai_2001, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# Filter for the years 2001
+gdf_nightlights_mp_seoni_chhindwara_kurai_2001 = gdf_nightlights_mp_seoni_chhindwara_kurai_2001[gdf_nightlights_mp_seoni_chhindwara_kurai_2001['year'] == 2001]["dmsp_mean_light"].values
+```
+
+```{python}
+# Calculate the mean for 2001 and 2020
+dmsp_2001_mp_seoni_chhindwara_kurai_2001 = gdf_nightlights_mp_seoni_chhindwara_kurai_2001.mean()
+```
+
+```{python}
+# Repeating the process for 2010
+nightlights_mp_seoni_chhindwara_kurai_2010 = nightlights_mp_seoni_chhindwara_2010[
+    (nightlights_mp_seoni_chhindwara_2010["shrid2"].str.startswith("11-23-455-03657-495377")) |
+    (nightlights_mp_seoni_chhindwara_2010["shrid2"].str.startswith("11-23-456-03666-497170"))]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nightlights_mp_seoni_chhindwara_kurai_2010 = pd.merge(nightlights_mp_seoni_chhindwara_kurai_2010, kurai_id, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nightlights_mp_seoni_chhindwara_kurai_2010 = pd.merge(nightlights_mp_seoni_chhindwara_kurai_2010, coordinates_shrid, on = "shrid2")
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nightlights_mp_seoni_chhindwara_kurai_2010["geometry"] = nightlights_mp_seoni_chhindwara_kurai_2010.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_mp_seoni_chhindwara_kurai_2010 = gpd.GeoDataFrame(nightlights_mp_seoni_chhindwara_kurai_2010, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# Filter for the years 2001
+gdf_nightlights_mp_seoni_chhindwara_kurai_2010 = gdf_nightlights_mp_seoni_chhindwara_kurai_2010[gdf_nightlights_mp_seoni_chhindwara_kurai_2010['year'] == 2010]["dmsp_mean_light"].values
+```
+
+```{python}
+# Calculate the mean for 2001 and 2020
+dmsp_2010_mp_seoni_chhindwara_kurai_2010 = gdf_nightlights_mp_seoni_chhindwara_kurai_2010.mean()
+```
+
+```{python}
+# Getting the percentage change
+percentage_change_nl_mp_seoni_chhindwara_kurai = ((dmsp_2010_mp_seoni_chhindwara_kurai_2010 - dmsp_2001_mp_seoni_chhindwara_kurai_2001) / dmsp_2001_mp_seoni_chhindwara_kurai_2001) * 100
+print(f"Percentage change in nightlights from 2001 to 2010 in Kurai, Seoni and Chhindwara, Madhya Pradesh: {percentage_change_nl_mp_seoni_chhindwara_kurai:.2f}%")
+```
+
+```{python}
+nighttime_lights_india_2012 = nighttime_lights_india_2012_2022[nighttime_lights_india_2012_2022["year"] == 2012]
+```
+
+```{python}
+# Merging on the basis of the shrid2 id
+nighttime_lights_india_2012 = pd.merge(nighttime_lights_india_2012, location_shrid, on = "shrid2")
+```
+
+```{python}
+# Merging on the basis of shrid2 id again
+nighttime_lights_india_2012 = pd.merge(nighttime_lights_india_2012, coordinates_shrid, on = "shrid2")
+nighttime_lights_india_2012.head()
+```
+
+```{python}
+from shapely.geometry import Point
+
+# we manually add a geometry column
+nighttime_lights_india_2012["geometry"] = nighttime_lights_india_2012.apply(lambda row: Point(row["longitude"], row["latitude"]), axis=1)
+```
+
+```{python}
+nightlights_mp_seoni_chhindwara_kurai_2012 = nighttime_lights_india_2012[
+    (nighttime_lights_india_2012["shrid2"].str.startswith("11-23-455-03657-495377")) |
+    (nighttime_lights_india_2012["shrid2"].str.startswith("11-23-456-03666-497170"))]
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_mp_seoni_chhindwara_kurai_2012 = gpd.GeoDataFrame(nightlights_mp_seoni_chhindwara_kurai_2012, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# Calculate the mean for 2010
+log_viirs_2012_mp_seoni_chhindwara_kurai = np.log1p(
+    gdf_nightlights_mp_seoni_chhindwara_kurai_2012["viirs_annual_mean"]
+)
+
+# Calculate the mean of the log-transformed values
+log_mean_viirs_2012_mp_seoni_chhindwara_kurai = log_viirs_2012_mp_seoni_chhindwara_kurai.mean()
+```
+
+```{python}
+# Repeating this for 2020
+nightlights_mp_seoni_chhindwara_kurai_2020 = nighttime_lights_india_2020[
+    (nighttime_lights_india_2020["shrid2"].str.startswith("11-23-455-03657-495377")) |
+    (nighttime_lights_india_2020["shrid2"].str.startswith("11-23-456-03666-497170"))]
+```
+
+```{python}
+# converting to geodataframe
+gdf_nightlights_mp_seoni_chhindwara_kurai_2020 = gpd.GeoDataFrame(nightlights_mp_seoni_chhindwara_kurai_2020, geometry = "geometry", crs = "EPSG:4326")
+```
+
+```{python}
+# Calculate the mean for 2020
+log_viirs_2020_mp_seoni_chhindwara_kurai = np.log1p(
+    gdf_nightlights_mp_seoni_chhindwara_kurai_2020["viirs_annual_mean"]
+)
+
+# Calculate the mean of the log-transformed values
+log_mean_viirs_2020_mp_seoni_chhindwara_kurai = log_viirs_2020_mp_seoni_chhindwara_kurai.mean()
+```
+
+```{python}
+percentage_change_nl_mp_seoni_chhindwara_kurai = ((log_mean_viirs_2020_mp_seoni_chhindwara_kurai - log_mean_viirs_2012_mp_seoni_chhindwara_kurai) / log_mean_viirs_2012_mp_seoni_chhindwara_kurai) * 100
+print(f"Percentage change in nightlights from 2012 to 2020 in Kurai, Madhya Pradesh: {percentage_change_nl_mp_seoni_chhindwara_kurai:.2f}%")
+```
+
+As would've been expected, nighttime lights increased over the years. We observed this on an all-India level and also on subsequent levels of the states and districts in which the national parks are situated. Ramnagar experienced a 112.86% increase in nightlights from 2001 to 2010, aligning with peak commercialization around Jim Corbett. In contrast, Kurai, Madhya Pradesh, showed a slower 6.38% rise during the same period, but a dramatic 400.35% increase from 2012 to 2020, reflecting a later commercialization phase. The trend around the areas of Pench was something that stood out for us.
+![](images/nightlights_pench.png)
+
+**Tourism Analysis**
+
+```{python}
+#| echo: false
+
+#Importing data
+
+tourism_data = pd.read_excel("/Users/nidhi/Desktop/Data and Programming Python 2/Final Project/National Park Visit Data.xlsx")
+tourism_data
+
+```
+
+
+```{python}
+#| echo: false
+#National Park Visit Visualisation of tourism trends over the years
+
+line_chart_1 = alt.Chart(tourism_data).mark_line(point=True).encode(
+    x=alt.X('Year:O', title='Year'),
+    y=alt.Y('Jim Corbett:Q', title='Number of Visitors in Jim Corbett National Park'),
+    tooltip=['Year', 'Jim Corbett'],  # Add tooltip for interactivity
+    color=alt.value('green')  # Set a specific color
+).properties(
+    title='Visitor Trends Over Time',
+    width=600,  # Chart width
+    height=400  # Chart height
+)
+
+#line_chart_1.show()
+
+#We see consistent increase in Jim Corbett total tourism
+
+line_chart_2 = alt.Chart(tourism_data).mark_line(point=True).encode(
+    x=alt.X('Year:O', title='Year'),
+    y=alt.Y('Pench National Park:Q', title='Number of Visitors in Jim Corbett National Park'),
+    tooltip=['Year', 'Pench National Park'],  # Add tooltip for interactivity
+    color=alt.value('orange')  # Set a specific color
+).properties(
+    title='Visitor Trends Over Time (Pench NAational Park)',
+    width=600,  # Chart width
+    height=400  # Chart height
+)
+
+#line_chart_2.show()
+
+#Comparison Chart
+#layered_chart = line_chart_1 + line_chart_2
+#layered_chart.show()
+
+#Basic Comparison plus further exploration:
+#1. Increase in both reeserves
+# 2. Has the increase in Pench been higher than that of Jim Corbett
+# The relative start point of Jim Corbett has been way higher than that of Pench
+
+#Melted data
+visitor_data_long = tourism_data.melt(id_vars="Year", var_name="Park", value_name="Visitors")
+#Combined plot
+line_chart = alt.Chart(visitor_data_long).mark_line(point=True).encode(
+    x=alt.X('Year:O', title='Year'),
+    y=alt.Y('Visitors:Q', title='Number of Visitors'),
+    color=alt.Color(
+        'Park:N',
+        scale=alt.Scale(range=['#006400', '#32CD32', '#FFA500', '#FF8C00']),  # Shades of green and orange
+        legend=alt.Legend(title="Park")
+    ),
+    tooltip=['Year', 'Park', 'Visitors']  # Add tooltips
+).properties(
+    title="Comparative Visitor Trends",
+    width=600,
+    height=400,
+)
+
+line_chart
+            
+```
+
+
+```{python}
+#| echo: false
+
+#Some statistical analysis of tourism numbers 
+
+#Question 1 - How much is start point higher for Jim Corbett than Pench
+jc_start = tourism_data.loc[0, "Jim Corbett"]
+pench_start = tourism_data.loc[0,"Pench National Park"]
+
+diff = ((jc_start - pench_start)/pench_start)*100
+diff = round(diff)
+print(f'The tourism in Jim Corbett starting 2000 was almost {diff}higher than Pench')
+
+#Question 2 - How much has the tourism increased in both national parks over the years through out the study
+jc_end = tourism_data.loc[21,"Jim Corbett"]
+pench_end = tourism_data.loc[21,"Pench National Park"]
+
+roc_jim = ((jc_end - jc_start)/jc_start)*100
+roc_jim = round(roc_jim)
+print(f'The tourism footfall in Jim Corbett increased by {roc_jim}')
+
+roc_pen = ((pench_end - pench_start)/pench_start)*100
+print(f'The tourism footfall increased in Pench by {roc_pen}')
+
+
+#Overall, tourism growth in Pench has been way higher than Jim Corbett despite Jim Corbett harbouring higher number of tigers.
+
+#Question 3 - How much has the the tourism increased in both national parks from 2000-2010
+
+#Part1 - 2000-2010
+jc_2010 = tourism_data.loc[10,"Jim Corbett"]
+pench_2010 = tourism_data.loc[10,"Pench National Park"]
+
+roc_jim_2010 = ((jc_2010 - jc_start)/jc_start)*100
+roc_jim_2010 = round(roc_jim_2010)
+print(f'The tourism footfall from 2000-2010 in Jim Corbett increased by {roc_jim_2010}')
+
+roc_pen_2010 = ((pench_2010 - pench_start)/pench_start)*100
+print(f'The tourism footfall from 2000-2010 increased in Pench by {roc_pen_2010}')
+
+#part2 - 2010-End
+roc_jim_end = ((jc_end - jc_2010)/jc_2010)*100
+roc_jim_end = round(roc_jim)
+print(f'The tourism footfall in Jim Corbett 2010-2021 increased by {roc_jim_end}')
+
+roc_pen_end = ((pench_end - pench_2010)/pench_2010)*100
+roc_pen_end= round(roc_pen_end)
+print(f'The tourism footfall from 2010-2021 increased in Pench by {roc_pen_end}')
+
+
+```
+
+```{python}
+#| echo: false
+#Tourism Increase in jim Corbett  from 2001-2010 & 2012-2020
+jc_2001 = tourism_data.loc[1, "Jim Corbett"]
+jc_2010 = tourism_data.loc[10, "Jim Corbett"]
+jc_2012 = tourism_data.loc[12, "Jim Corbett"]
+jc_2020 = tourism_data.loc[20, "Jim Corbett"]
+
+diff_2010 = ((jc_2010 - jc_2001)/jc_2001)*100
+diff_2020 = ((jc_2020 - jc_2012)/jc_2012)*100
+
+print(f'The increase in Jim Corbett tourism from 2001 to 2010 is {diff_2010}')
+print(f'The increase in Jim Corbett tourism from 2012 to 2020 is {diff_2020}')
+
+```
+
+```{python}
+#| echo: false
+#Tourism Increase in Pench  from 2001-2010 & 2012-2020
+pench_2001 = tourism_data.loc[1, "Pench National Park"]
+pench_2010 = tourism_data.loc[10, "Pench National Park"]
+pench_2012 = tourism_data.loc[12, "Pench National Park"]
+pench_2020 = tourism_data.loc[20, "Pench National Park"]
+
+diff_2010 = (pench_2010 - pench_2001)/(pench_2001)*100
+diff_2020 = (pench_2020 - pench_2012)/(pench_2012)*100
+
+print(f'The increase in Pench tourism from 2001 to 2010 is {diff_2010}')
+print(f'The increase in Pench tourism from 2012 to 2020 is {diff_2020}')
+
+
+```
+
+
+```{python}
+#| echo: false
+jc_2021 = tourism_data.loc[21, "Jim Corbett"]
+jc_2023  = tourism_data.loc[23, "Jim Corbett"]
+change = ((jc_2023 - jc_2021)/jc_2021)*100
+
+print(f'The increase in JC from 2021 to 2023 is {change}')
+```
+
+```{python}
+#| echo: false
+pench_2021 = tourism_data.loc[21,"Pench National Park"]
+
+change_pench = ((pench_end - pench_2021)/pench_2021)*100
+
+print(f'The increase in Pench from 2021 to 2023 is {change_pench}')
+```
+
+
+Tourism trends revealed significant growth, particularly in Pench National Park, which saw a remarkable 1417% increase in footfalls compared to 480% in Jim Corbett between 2000 and 2021. While Jim Corbett historically attracted more tourists, Pench has become a popular destination, especially for tiger sightings. During 2000-2010, Pench experienced a 524% rise in tourism compared to Jim Corbett’s 212%, but the growth reversed in 2010-2021, with Jim Corbett seeing a 447% increase compared to Pench’s 143%.
