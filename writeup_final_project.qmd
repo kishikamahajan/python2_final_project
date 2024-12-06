@@ -33,6 +33,11 @@ The coding of the project mainly involves three parts: Forest Cover Analysis, Ni
 **Forest Cover Analysis**
 
 ```{python}
+# link for forest data, shapefiles, location data, coordinates data, nighttime lights data
+# https://uchicago.box.com/s/brjbxr6havh0jcd44lziks2dia5w99cl
+```
+
+```{python}
 
 import pandas as pd
 import altair as alt
@@ -3238,6 +3243,8 @@ Tourism trends revealed significant growth, particularly in Pench National Park,
 Conclusion/Drawbacks/ Way Forward
 
 We summarise our findings in two main periods, 2001-2010 and 2012-2020.
+
+![](pictures/conclusion_tab;e.png)
 
 We assume that nightlights have a lagged effect as it typically takes time for people to respond to increase in demand. Hence, the increase in nightlights in one period stems from the increase in demand in the previous period. For Jim Corbett, we see a stark increase in nightlights which we suppose comes from the early commercialisation in the National Park. Due to spillover effects of the already commercialized park (Jim Corbett) and increase in Tiger population in Pench, we see a sudden influx of tourists in Pench. The increase in nighlights in Pench however had been significantly low. In the subsequent years, we see sudden “commercialisation effects” in Pench due to sudden influx of tourism in the previous period. Further, the little increase in nightlights and the fall in tourism leads to higher tiger numbers in Jim Corbett National Park. While our primary intuition was a negative impact of commercialisation on tiger sightings, we actually see tiger conservation as a positive externality for the adjoining human settlements. In other words, an increase in tourism due to an increase in the probability of tiger sightings attracted a lot of economic development in the adjoining areas.
 
