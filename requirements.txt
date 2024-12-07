@@ -1,0 +1,6 @@
+altair==5.5.0
+geopandas==1.0.1
+matplotlib==3.9.3
+pandas==2.2.3
+shiny==1.2.0
+shinywidgets==0.3.4
