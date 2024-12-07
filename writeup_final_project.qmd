@@ -1,9 +1,10 @@
 ---
 title: "Impact of Commercialisation on National Parks in India"
-author: "Nidhi Srivastava (Section 4, ), Kishika Mahajan (Section 4, kishikamahajan)"
+author: "Nidhi Srivastava & Kishika Mahajan" 
 date: today
 format: 
   pdf:
+    classoption: 10pt  
     include-in-header: 
        text: |
          \usepackage{fvextra}
@@ -16,15 +17,20 @@ include-before-body:
       breaksymbolleft={},
       breaklines
     }
-output:
+execute:
   echo: false
   eval: false
 ---
 
-```{python}
-#| echo: true
-#| eval: false
+------------------------------------------------------------------------
 
+**Authors:**
+
+1\. Nidhi Srivastava (Section 4, nidhiATUchicago)
+
+2\. Kishika Mahajan (Section 4, kishikamahajan)
+
+```{python}
 def print_file_contents(file_path):
     """Print contents of a file."""
     try:
@@ -45,7 +51,7 @@ def print_file_contents(file_path):
 print_file_contents("/Users/kishikamahajan/Desktop/GitHub/python2_final_project/forest_cover_tourism/app.py") # Change accordingly
 ```
 
-**Impact of Commercialisation on National Parks in India**
+------------------------------------------------------------------------
 
 As of 2023, there are 106 existing national parks in India covering an area of approximately 44,403 km2, which is 1.35% of the geographical area of the country. Many of these national parks, home to the ‘Royal Bengal Tigers’, have become prime tourist attractions of the country. India, with the effort of 50 years of Tiger conservation measures, now harbours almost 75% of the world's wild tiger population. Due to this remarkable increase in tiger sightings resulting from continuous conservation efforts, we have seen a commensurate increase in the higher commercialisation of national parks and tourist footfall. The goal of this study is to assess the implications of rising commercialisation on tiger population and further understand the sustainability of such conservation policies. The anticipated impacts of commercialization included forest cover depletion, a rise in tourism, increased economic activity, and a decline in wildlife populations.
 
@@ -986,8 +992,6 @@ plt.tight_layout()
 plt.show()
 ```
 
-**Looking at Percentage Increases**
-
 ```{python}
 # The Jim Corbett National Park is in the Ramnagar subdistrict of Nainital district in Uttarakhand. 
 value_to_check = 'ramnagar'
@@ -1102,7 +1106,8 @@ percentage_change_fc_mp_seoni_chhindwara_kurai = ((vcf_2020_mp_seoni_chhindwara_
 print(f"Percentage change in VCF Mean from 2001 to 2020 in Kurai, Madhya Pradesh: {percentage_change_fc_mp_seoni_chhindwara_kurai:.2f}%")
 ```
 
-Contrary to expectations, forest cover showed an increase rather than over the years. We observed this on an all-India level and also on subsequent levels of the states and districts in which the national parks are situated. Ramnagar, Uttarakhand (sub district in which Jim Corbett National Park is located) reported a 21.42% rise in VCF Mean from 2001 to 2020, and Kurai (village in which Pench National Park is located), Madhya Pradesh, observed a 3.95% increase. Essentially, the more commercialised national park saw a greater increase in forest cover. ![](pictures/forest_cover_jim_corbett.png)
+Contrary to expectations, forest cover showed an increase rather than over the years. We observed this on an all-India level and also on subsequent levels of the states and districts in which the national parks are situated. Ramnagar, Uttarakhand (sub district in which Jim Corbett National Park is located) reported a 21.42% rise in VCF Mean from 2001 to 2020, and Kurai (village in which Pench National Park is located), Madhya Pradesh, observed a 3.95% increase. Essentially, the more commercialised national park saw a greater increase in forest cover. 
+![](pictures/forest_cover_jim_corbett.png)
 
 These findings prompted further investigation into the validity of the methodology of measuring forest cover. For this purpose, we conducted a polarity analysis by scraping 11 news articles.
 
@@ -1515,8 +1520,6 @@ paragraphs_11 = soup.find_all("p")
 ```{python}
 article_11_text = "\n".join([p.get_text() for p in paragraphs_11])
 ```
-
-Saving this file
 
 ```{python}
 with open("article_11.txt", "w", encoding="utf-8") as file:
@@ -2347,8 +2350,6 @@ nightlights_mp_2010 = pd.merge(nightlights_mp_2010, mp_id, on = "shrid2")
 nightlights_mp_2010 = pd.merge(nightlights_mp_2010, coordinates_shrid, on = "shrid2")
 ```
 
-Converting this into a spatial object
-
 ```{python}
 from shapely.geometry import Point
 
@@ -2767,8 +2768,6 @@ plt.tight_layout()
 plt.show()
 ```
 
-**Looking at Percentage Increases**
-
 ```{python}
 # The Jim Corbett National Park is in the Ramnagar subdistrict of Nainital district in Uttarakhand. 
 value_to_check = 'ramnagar'
@@ -3085,7 +3084,8 @@ percentage_change_nl_mp_seoni_chhindwara_kurai = ((log_mean_viirs_2020_mp_seoni_
 print(f"Percentage change in nightlights from 2012 to 2020 in Kurai, Madhya Pradesh: {percentage_change_nl_mp_seoni_chhindwara_kurai:.2f}%")
 ```
 
-As would've been expected, nighttime lights increased over the years. We observed this on an all-India level and also on subsequent levels of the states and districts in which the national parks are situated. Ramnagar experienced a 112.86% increase in nightlights from 2001 to 2010, aligning with peak commercialization around Jim Corbett. In contrast, Kurai, Madhya Pradesh, showed a slower 6.38% rise during the same period, but a dramatic 400.35% increase from 2012 to 2020, reflecting a later commercialization phase. The trend around the areas of Pench was something that stood out for us. ![](images/nightlights_pench.png)
+As would've been expected, nighttime lights increased over the years. We observed this on an all-India level and also on subsequent levels of the states and districts in which the national parks are situated. Ramnagar experienced a 112.86% increase in nightlights from 2001 to 2010, aligning with peak commercialization around Jim Corbett. In contrast, Kurai, Madhya Pradesh, showed a slower 6.38% rise during the same period, but a dramatic 400.35% increase from 2012 to 2020, reflecting a later commercialization phase. The trend around the areas of Pench was something that stood out for us. 
+![](pictures/nightlights_pench.png)
 
 **Tourism Analysis**
 
@@ -3267,10 +3267,9 @@ print(f'The increase in Pench from 2021 to 2023 is {change_pench}')
 
 Tourism trends revealed significant growth, particularly in Pench National Park, which saw a remarkable 1417% increase in footfalls compared to 480% in Jim Corbett between 2000 and 2021. While Jim Corbett historically attracted more tourists, Pench has become a popular destination, especially for tiger sightings. During 2000-2010, Pench experienced a 524% rise in tourism compared to Jim Corbett’s 212%, but the growth reversed in 2010-2021, with Jim Corbett seeing a 447% increase compared to Pench’s 143%.
 
-Conclusion/Drawbacks/ Way Forward
+**Conclusion**
 
 We summarise our findings in two main periods, 2001-2010 and 2012-2020.
-
 ![](pictures/conclusion_tab;e.png)
 
 We assume that nightlights have a lagged effect as it typically takes time for people to respond to increase in demand. Hence, the increase in nightlights in one period stems from the increase in demand in the previous period. For Jim Corbett, we see a stark increase in nightlights which we suppose comes from the early commercialisation in the National Park. Due to spillover effects of the already commercialized park (Jim Corbett) and increase in Tiger population in Pench, we see a sudden influx of tourists in Pench. The increase in nighlights in Pench however had been significantly low. In the subsequent years, we see sudden “commercialisation effects” in Pench due to sudden influx of tourism in the previous period. Further, the little increase in nightlights and the fall in tourism leads to higher tiger numbers in Jim Corbett National Park. While our primary intuition was a negative impact of commercialisation on tiger sightings, we actually see tiger conservation as a positive externality for the adjoining human settlements. In other words, an increase in tourism due to an increase in the probability of tiger sightings attracted a lot of economic development in the adjoining areas.
